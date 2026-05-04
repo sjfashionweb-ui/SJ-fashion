@@ -6,9 +6,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 // This is the crucial export your AdminLogin page is looking for!
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// ... your existing listOrders, listProducts, etc. functions stay exactly as they are below this
-// 
-
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 
 const BASE = `https://${projectId}.supabase.co/functions/v1/make-server-8d4aec83`;
@@ -32,7 +29,9 @@ export type Product = {
   subcategory: string;
   brand: string;
   price: number;
+  bulkPricing?: { minQty: number; price: number }[]; // NEW: Bulk pricing tiers
   imageUrl: string;
+  images?: string[]; // NEW: Array for multiple images
   variants: Variant[];
   createdAt: string;
 };
@@ -68,6 +67,17 @@ export async function createProduct(p: Partial<Product>): Promise<Product> {
     body: JSON.stringify(p),
   });
   const data = await handle<{ product: Product }>(res, "createProduct");
+  return data.product;
+}
+
+// NEW: Added updateProduct for the EditProductForm
+export async function updateProduct(id: string, patch: Partial<Product>): Promise<Product> {
+  const res = await fetch(`${BASE}/products/${id}`, {
+    method: "PUT",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  const data = await handle<{ product: Product }>(res, "updateProduct");
   return data.product;
 }
 
