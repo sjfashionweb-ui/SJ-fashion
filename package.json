@@ -87,13 +87,4 @@
       "vite": "6.3.5"
     }
   }
-
-  {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
-}
 }
