@@ -5,6 +5,7 @@ import {
   TrendingUp,
   DollarSign,
   Trash2,
+  Pencil,
 } from "lucide-react";
 import {
   BarChart,
@@ -39,6 +40,7 @@ import {
 } from "../ui/select";
 import { Toaster } from "../ui/sonner";
 import { AddProductForm } from "./AddProductForm";
+import { EditProductForm } from "./EditProductForm"; 
 import {
   deleteProduct,
   listOrders,
@@ -64,6 +66,7 @@ const formatCurrency = (amount: number) => {
 export function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   async function refresh() {
     try {
@@ -225,7 +228,16 @@ export function AdminPage() {
           </TabsList>
 
           <TabsContent value="products" className="space-y-6 mt-4">
-            <AddProductForm onCreated={refresh} />
+            {editingProduct ? (
+              <EditProductForm 
+                product={editingProduct} 
+                onClose={() => setEditingProduct(null)} 
+                onUpdated={refresh} 
+              />
+            ) : (
+              <AddProductForm onCreated={refresh} />
+            )}
+
             <Card className="bg-neutral-900 border-white/10">
               <CardHeader>
                 <CardTitle className="text-white">All Products ({products.length})</CardTitle>
@@ -262,27 +274,27 @@ export function AdminPage() {
                         <TableCell className="text-neutral-300">{formatCurrency(p.price)}</TableCell>
                         <TableCell className="text-neutral-300">{p.variants?.length || 0}</TableCell>
                         <TableCell>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:bg-red-500/20 hover:text-red-400"
-                            onClick={() => handleDelete(p.id)}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-amber-400/20 hover:text-amber-400"
+                              onClick={() => setEditingProduct(p)}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-red-500/20 hover:text-red-400"
+                              onClick={() => handleDelete(p.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
-                    {products.length === 0 && (
-                      <TableRow className="border-white/10">
-                        <TableCell
-                          colSpan={7}
-                          className="text-center text-neutral-500 py-8"
-                        >
-                          No products yet
-                        </TableCell>
-                      </TableRow>
-                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -338,22 +350,6 @@ export function AdminPage() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {orders.length === 0 && (
-                      <TableRow className="border-white/10">
-                        <TableCell
-                          colSpan={6}
-                          className="text-center text-neutral-500 py-8"
-                        >
-                          No orders yet —{" "}
-                          <button
-                            className="underline hover:text-amber-400"
-                            onClick={seedDemoOrder}
-                          >
-                            create a demo order
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    )}
                   </TableBody>
                 </Table>
               </CardContent>
