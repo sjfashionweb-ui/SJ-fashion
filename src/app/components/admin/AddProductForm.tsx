@@ -248,7 +248,7 @@ export function AddProductForm({ onCreated }: Props) {
                 {bulkPricing.map((tier, i) => (
                   <div key={i} className="flex items-end gap-2 p-2 border border-white/10 rounded bg-neutral-950">
                     <div className="flex-1">
-                      <Label className="text-[10px] text-neutral-400">If Qty is > =</Label>
+                      <Label className="text-[10px] text-neutral-400">{"If Qty is >="}</Label>
                       <Input type="number" value={tier.minQty} onChange={(e) => updateTier(i, { minQty: Number(e.target.value) })} className="bg-neutral-900 border-white/10 h-8 text-sm" />
                     </div>
                     <div className="flex-1">
