@@ -6,11 +6,23 @@ import { createOrder } from "../lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
 
+// Helper function to format LKR
+const formatCurrency = (amount: number) => {
+  return `LKR ${amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
 export default function Cart() {
   const { items, total, setQty, remove, clear } = useCart();
   const [name, setName] = useState("");
   const [placing, setPlacing] = useState(false);
   const nav = useNavigate();
+
+  // Updated shipping logic for LKR
+  const shippingThreshold = 15000;
+  const flatShippingRate = 1500;
+  const shippingCost = total >= shippingThreshold ? 0 : flatShippingRate;
+  const tax = total * 0.08;
+  const grandTotal = total + shippingCost + tax;
 
   async function checkout() {
     if (items.length === 0) return;
@@ -24,7 +36,7 @@ export default function Cart() {
           qty: i.qty,
           price: i.price,
         })),
-        total,
+        total: grandTotal, // Make sure we pass the final calculated total including tax/shipping
         status: "pending",
       });
       toast.success("Order placed! Thank you.");
@@ -65,7 +77,7 @@ export default function Cart() {
                   <h3 className="font-semibold">{i.name}</h3>
                 </Link>
                 <p className="text-xs text-neutral-400">Size: {i.size} · Color: {i.color}</p>
-                <p className="font-semibold mt-2">${i.price.toFixed(2)}</p>
+                <p className="font-semibold mt-2">{formatCurrency(i.price)}</p>
                 <div className="flex items-center gap-3 mt-3">
                   <div className="flex items-center border border-white/20 rounded">
                     <button className="w-8 h-8" onClick={() => setQty(i.productId, i.size, i.color, i.qty - 1)}>−</button>
@@ -77,20 +89,20 @@ export default function Cart() {
                   </button>
                 </div>
               </div>
-              <p className="font-semibold">${(i.price * i.qty).toFixed(2)}</p>
+              <p className="font-semibold">{formatCurrency(i.price * i.qty)}</p>
             </div>
           ))}
         </div>
         <aside className="bg-white/5 border border-white/10 rounded-lg p-6 h-fit sticky top-28">
           <h2 className="font-display text-2xl mb-4">Order Summary</h2>
           <div className="space-y-2 text-sm mb-4">
-            <div className="flex justify-between"><span className="text-neutral-400">Subtotal</span><span>${total.toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-neutral-400">Shipping</span><span>{total >= 50 ? "Free" : "$8.00"}</span></div>
-            <div className="flex justify-between"><span className="text-neutral-400">Tax</span><span>${(total * 0.08).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-400">Subtotal</span><span>{formatCurrency(total)}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-400">Shipping</span><span>{shippingCost === 0 ? "Free" : formatCurrency(shippingCost)}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-400">Tax</span><span>{formatCurrency(tax)}</span></div>
           </div>
           <div className="flex justify-between font-bold text-lg pt-3 border-t border-white/10 mb-6">
             <span>Total</span>
-            <span>${(total + (total >= 50 ? 0 : 8) + total * 0.08).toFixed(2)}</span>
+            <span>{formatCurrency(grandTotal)}</span>
           </div>
           <input
             value={name}

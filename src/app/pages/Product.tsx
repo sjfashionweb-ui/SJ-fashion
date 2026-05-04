@@ -65,7 +65,7 @@ export default function ProductPage() {
         <div>
           <p className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-2">{product.brand}</p>
           <h1 className="font-display text-4xl mb-3">{product.name}</h1>
-          <p className="text-3xl font-light mb-6">${product.price.toFixed(2)}</p>
+          <p className="text-3xl font-light mb-6">LKR {product.price.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           <p className="text-neutral-400 mb-8">{product.description}</p>
 
           {sizes.length > 0 && (
@@ -126,7 +126,7 @@ export default function ProductPage() {
               <Truck className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs font-semibold">Free Shipping</p>
-                <p className="text-xs text-neutral-500">Over $50</p>
+                <p className="text-xs text-neutral-500">Over LKR 15,000</p>
               </div>
             </div>
             <div className="flex items-start gap-2">

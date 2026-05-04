@@ -7,6 +7,7 @@ import { useCart } from "../lib/cart";
 export function ProductCard({ p }: { p: Product }) {
   const { wishlist, toggleWishlist } = useCart();
   const liked = wishlist.includes(p.id);
+  
   return (
     <div className="group">
       <div className="relative aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden mb-3">
@@ -30,7 +31,9 @@ export function ProductCard({ p }: { p: Product }) {
       <Link to={`/product/${p.id}`}>
         <p className="text-[10px] tracking-[0.2em] uppercase text-amber-400 mb-1">{p.brand}</p>
         <h3 className="text-sm text-white mb-1 group-hover:text-amber-400 transition">{p.name}</h3>
-        <p className="text-sm font-semibold text-white">${p.price.toFixed(2)}</p>
+        <p className="text-sm font-semibold text-white">
+          LKR {p.price.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
       </Link>
     </div>
   );

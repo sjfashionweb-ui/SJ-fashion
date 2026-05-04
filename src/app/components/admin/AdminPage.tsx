@@ -22,7 +22,6 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 import {
   Table,
   TableBody,
@@ -51,7 +50,16 @@ import {
 } from "../../lib/api";
 import { toast } from "sonner";
 
-const COLORS = ["#e11d48", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"];
+const COLORS = ["#fbbf24", "#3b82f6", "#10b981", "#8b5cf6", "#e11d48"];
+
+// Currency formatter for LKR
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-LK', {
+    style: 'currency',
+    currency: 'LKR',
+    minimumFractionDigits: 2
+  }).format(amount);
+};
 
 export function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -159,21 +167,21 @@ export function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Toaster position="top-right" />
-      <header className="bg-white border-b sticky top-0 z-30">
+    <div className="dark min-h-screen bg-neutral-950 text-white">
+      <Toaster position="top-right" theme="dark" />
+      <header className="bg-neutral-950/95 backdrop-blur border-b border-white/10 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">
-              <span className="text-rose-600">SJ</span> Admin Portal
+            <h1 className="text-2xl font-display tracking-tight">
+              <span className="italic text-amber-400">SJ</span> Admin Portal
             </h1>
-            <p className="text-xs text-gray-500">Private — owner access only</p>
+            <p className="text-xs text-neutral-400">Private — owner access only</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={seedDemoOrder}>
+            <Button className="bg-amber-400 text-black hover:bg-amber-500" onClick={seedDemoOrder}>
               + Demo Order
             </Button>
-            <Button variant="ghost" onClick={() => (window.location.hash = "/")}>
+            <Button variant="ghost" className="text-white hover:text-amber-400" onClick={() => (window.location.hash = "/")}>
               View Storefront
             </Button>
           </div>
@@ -186,77 +194,78 @@ export function AdminPage() {
           <Kpi
             icon={<DollarSign className="w-5 h-5" />}
             label="Revenue"
-            value={`$${stats.revenue.toFixed(2)}`}
-            color="bg-rose-100 text-rose-700"
+            value={formatCurrency(stats.revenue)}
+            color="bg-amber-400/20 text-amber-400"
           />
           <Kpi
             icon={<ShoppingCart className="w-5 h-5" />}
             label="Orders"
             value={String(stats.orderCount)}
-            color="bg-blue-100 text-blue-700"
+            color="bg-blue-500/20 text-blue-400"
           />
           <Kpi
             icon={<Package className="w-5 h-5" />}
             label="Products"
             value={String(stats.productCount)}
-            color="bg-amber-100 text-amber-700"
+            color="bg-emerald-500/20 text-emerald-400"
           />
           <Kpi
             icon={<TrendingUp className="w-5 h-5" />}
             label="Delivered"
             value={String(stats.delivered)}
-            color="bg-emerald-100 text-emerald-700"
+            color="bg-purple-500/20 text-purple-400"
           />
         </div>
 
         <Tabs defaultValue="products">
-          <TabsList>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="bg-white/5 border border-white/10">
+            <TabsTrigger value="products" className="data-[state=active]:bg-amber-400 data-[state=active]:text-black">Products</TabsTrigger>
+            <TabsTrigger value="orders" className="data-[state=active]:bg-amber-400 data-[state=active]:text-black">Orders</TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-amber-400 data-[state=active]:text-black">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="space-y-6 mt-4">
             <AddProductForm onCreated={refresh} />
-            <Card>
+            <Card className="bg-neutral-900 border-white/10">
               <CardHeader>
-                <CardTitle>All Products ({products.length})</CardTitle>
+                <CardTitle className="text-white">All Products ({products.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Image</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Brand</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Variants</TableHead>
+                    <TableRow className="border-white/10 hover:bg-white/5">
+                      <TableHead className="text-neutral-400">Image</TableHead>
+                      <TableHead className="text-neutral-400">Name</TableHead>
+                      <TableHead className="text-neutral-400">Category</TableHead>
+                      <TableHead className="text-neutral-400">Brand</TableHead>
+                      <TableHead className="text-neutral-400">Price</TableHead>
+                      <TableHead className="text-neutral-400">Variants</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {products.map((p) => (
-                      <TableRow key={p.id}>
+                      <TableRow key={p.id} className="border-white/10 hover:bg-white/5">
                         <TableCell>
                           <img
                             src={p.imageUrl}
                             alt={p.name}
-                            className="w-12 h-12 object-cover rounded"
+                            className="w-12 h-12 object-cover rounded border border-white/10"
                           />
                         </TableCell>
-                        <TableCell className="font-medium">{p.name}</TableCell>
-                        <TableCell className="capitalize">
+                        <TableCell className="font-medium text-white">{p.name}</TableCell>
+                        <TableCell className="capitalize text-neutral-300">
                           {p.category}
                           {p.subcategory ? ` / ${p.subcategory}` : ""}
                         </TableCell>
-                        <TableCell>{p.brand}</TableCell>
-                        <TableCell>${p.price}</TableCell>
-                        <TableCell>{p.variants?.length || 0}</TableCell>
+                        <TableCell className="text-neutral-300">{p.brand}</TableCell>
+                        <TableCell className="text-neutral-300">{formatCurrency(p.price)}</TableCell>
+                        <TableCell className="text-neutral-300">{p.variants?.length || 0}</TableCell>
                         <TableCell>
                           <Button
                             size="icon"
                             variant="ghost"
+                            className="hover:bg-red-500/20 hover:text-red-400"
                             onClick={() => handleDelete(p.id)}
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />
@@ -265,10 +274,10 @@ export function AdminPage() {
                       </TableRow>
                     ))}
                     {products.length === 0 && (
-                      <TableRow>
+                      <TableRow className="border-white/10">
                         <TableCell
                           colSpan={7}
-                          className="text-center text-gray-500 py-8"
+                          className="text-center text-neutral-500 py-8"
                         >
                           No products yet
                         </TableCell>
@@ -281,32 +290,32 @@ export function AdminPage() {
           </TabsContent>
 
           <TabsContent value="orders" className="mt-4">
-            <Card>
+            <Card className="bg-neutral-900 border-white/10">
               <CardHeader>
-                <CardTitle>Orders ({orders.length})</CardTitle>
+                <CardTitle className="text-white">Orders ({orders.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Order ID</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Items</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
+                    <TableRow className="border-white/10 hover:bg-white/5">
+                      <TableHead className="text-neutral-400">Order ID</TableHead>
+                      <TableHead className="text-neutral-400">Customer</TableHead>
+                      <TableHead className="text-neutral-400">Items</TableHead>
+                      <TableHead className="text-neutral-400">Total</TableHead>
+                      <TableHead className="text-neutral-400">Date</TableHead>
+                      <TableHead className="text-neutral-400">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orders.map((o) => (
-                      <TableRow key={o.id}>
-                        <TableCell className="font-mono text-xs">
+                      <TableRow key={o.id} className="border-white/10 hover:bg-white/5">
+                        <TableCell className="font-mono text-xs text-neutral-300">
                           {o.id.slice(0, 8)}
                         </TableCell>
-                        <TableCell>{o.customer}</TableCell>
-                        <TableCell>{o.items.length}</TableCell>
-                        <TableCell>${o.total.toFixed(2)}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-white">{o.customer}</TableCell>
+                        <TableCell className="text-neutral-300">{o.items.length}</TableCell>
+                        <TableCell className="text-neutral-300">{formatCurrency(o.total)}</TableCell>
+                        <TableCell className="text-neutral-300">
                           {new Date(o.createdAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
@@ -316,10 +325,10 @@ export function AdminPage() {
                               changeStatus(o, v as Order["status"])
                             }
                           >
-                            <SelectTrigger className="w-36">
+                            <SelectTrigger className="w-36 bg-neutral-950 border-white/10 text-white">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-neutral-900 border-white/10 text-white">
                               <SelectItem value="pending">Pending</SelectItem>
                               <SelectItem value="shipped">Shipped</SelectItem>
                               <SelectItem value="delivered">Delivered</SelectItem>
@@ -330,14 +339,14 @@ export function AdminPage() {
                       </TableRow>
                     ))}
                     {orders.length === 0 && (
-                      <TableRow>
+                      <TableRow className="border-white/10">
                         <TableCell
                           colSpan={6}
-                          className="text-center text-gray-500 py-8"
+                          className="text-center text-neutral-500 py-8"
                         >
                           No orders yet —{" "}
                           <button
-                            className="underline"
+                            className="underline hover:text-amber-400"
                             onClick={seedDemoOrder}
                           >
                             create a demo order
@@ -353,33 +362,33 @@ export function AdminPage() {
 
           <TabsContent value="analytics" className="mt-4">
             <div className="grid lg:grid-cols-2 gap-4">
-              <Card>
+              <Card className="bg-neutral-900 border-white/10">
                 <CardHeader>
-                  <CardTitle>Sales over time</CardTitle>
+                  <CardTitle className="text-white">Sales over time</CardTitle>
                 </CardHeader>
                 <CardContent className="h-72">
                   {salesByDay.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">No sales data yet.</p>
+                    <p className="text-neutral-500 text-sm">No sales data yet.</p>
                   ) : (
                     <ResponsiveContainer>
                       <BarChart data={salesByDay}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="total" fill="#fbbf24" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff1a" />
+                        <XAxis dataKey="date" stroke="#a3a3a3" />
+                        <YAxis stroke="#a3a3a3" />
+                        <Tooltip contentStyle={{ backgroundColor: '#171717', borderColor: '#ffffff1a', color: '#fff' }} />
+                        <Bar dataKey="total" fill="#fbbf24" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-neutral-900 border-white/10">
                 <CardHeader>
-                  <CardTitle>Sales by category</CardTitle>
+                  <CardTitle className="text-white">Sales by category</CardTitle>
                 </CardHeader>
                 <CardContent className="h-72">
                   {salesByCategory.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">No category sales yet.</p>
+                    <p className="text-neutral-500 text-sm">No category sales yet.</p>
                   ) : (
                     <ResponsiveContainer>
                       <PieChart>
@@ -388,14 +397,14 @@ export function AdminPage() {
                           dataKey="value"
                           nameKey="name"
                           outerRadius={90}
-                          label
+                          label={{ fill: '#f5f5f5' }}
                         >
                           {salesByCategory.map((entry, i) => (
                             <Cell key={`cell-${entry.name}-${i}`} fill={COLORS[i % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip />
-                        <Legend />
+                        <Tooltip contentStyle={{ backgroundColor: '#171717', borderColor: '#ffffff1a', color: '#fff' }} />
+                        <Legend wrapperStyle={{ color: '#a3a3a3' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   )}
@@ -421,14 +430,14 @@ function Kpi({
   color: string;
 }) {
   return (
-    <Card>
+    <Card className="bg-neutral-900 border-white/10">
       <CardContent className="p-5 flex items-center gap-4">
         <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${color}`}>
           {icon}
         </div>
         <div>
-          <p className="text-xs text-gray-500">{label}</p>
-          <p className="text-xl font-bold">{value}</p>
+          <p className="text-xs text-neutral-400">{label}</p>
+          <p className="text-xl font-bold text-white">{value}</p>
         </div>
       </CardContent>
     </Card>
