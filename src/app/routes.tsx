@@ -15,7 +15,7 @@ import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 import { AdminPage } from "./components/admin/AdminPage";
 import { AdminLogin } from "./components/admin/AdminLogin";
-import { supabase } from "./lib/api"; // Update this import if needed
+import { supabase } from "../../utils/supabase/info";
 
 // 1. Create a wrapper to protect the admin route
 function ProtectedAdminRoute() {
