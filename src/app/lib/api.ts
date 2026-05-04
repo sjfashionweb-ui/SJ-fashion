@@ -1,3 +1,14 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+// This is the crucial export your AdminLogin page is looking for!
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// ... your existing listOrders, listProducts, etc. functions stay exactly as they are below this
+// 
+
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 
 const BASE = `https://${projectId}.supabase.co/functions/v1/make-server-8d4aec83`;

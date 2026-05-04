@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Label } from "../ui/label";
 // IMPORTANT: Update this import path to point to your actual Supabase client!
-import { supabase } from "../../../../utils/supabase/info";
+import { supabase } from "../../lib/api";
 
 export function AdminLogin() {
   const [email, setEmail] = useState("");
