@@ -72,13 +72,19 @@ export async function createProduct(p: Partial<Product>): Promise<Product> {
 
 // NEW: Added updateProduct for the EditProductForm
 export async function updateProduct(id: string, patch: Partial<Product>): Promise<Product> {
-  const res = await fetch(`${BASE}/products/${id}`, {
-    method: "PUT",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify(patch),
-  });
-  const data = await handle<{ product: Product }>(res, "updateProduct");
-  return data.product;
+  // Use the direct Supabase client instead of the Edge Function
+  const { data, error } = await supabase
+    .from('products')
+    .update(patch)
+    .eq('id', id)
+    .select();
+    
+  if (error) {
+    console.error("Direct DB update failed:", error);
+    throw new Error(error.message);
+  }
+  
+  return data[0] as Product;
 }
 
 export async function deleteProduct(id: string): Promise<void> {
