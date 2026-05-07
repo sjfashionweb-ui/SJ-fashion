@@ -1,8 +1,16 @@
+import { useEffect } from "react";
 import { ProductCard } from "../components/ProductCard";
 import { useProducts } from "../lib/products";
 
 export default function Explore() {
-  const { products, loading } = useProducts();
+  // Grab 'refresh' from your custom hook
+  const { products, loading, refresh } = useProducts();
+
+  // Force a fresh fetch every time the user opens the Explore page
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="text-center mb-12">
