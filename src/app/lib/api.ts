@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// This is the crucial export your AdminLogin page is looking for!
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
@@ -29,9 +28,9 @@ export type Product = {
   subcategory: string;
   brand: string;
   price: number;
-  bulkPricing?: { minQty: number; price: number }[]; // NEW: Bulk pricing tiers
+  bulkPricing?: { minQty: number; price: number }[];
   imageUrl: string;
-  images?: string[]; // NEW: Array for multiple images
+  images?: string[];
   variants: Variant[];
   createdAt: string;
 };
@@ -70,21 +69,15 @@ export async function createProduct(p: Partial<Product>): Promise<Product> {
   return data.product;
 }
 
-// NEW: Added updateProduct for the EditProductForm
+// FIXED: Now correctly pointing to the new Edge Function PUT route!
 export async function updateProduct(id: string, patch: Partial<Product>): Promise<Product> {
-  // Use the direct Supabase client instead of the Edge Function
-  const { data, error } = await supabase
-    .from('products')
-    .update(patch)
-    .eq('id', id)
-    .select();
-    
-  if (error) {
-    console.error("Direct DB update failed:", error);
-    throw new Error(error.message);
-  }
-  
-  return data[0] as Product;
+  const res = await fetch(`${BASE}/products/${id}`, {
+    method: "PUT",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  const data = await handle<{ product: Product }>(res, "updateProduct");
+  return data.product;
 }
 
 export async function deleteProduct(id: string): Promise<void> {

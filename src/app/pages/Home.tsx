@@ -1,3 +1,4 @@
+import { useEffect } from "react"; // ADDED useEffect
 import { Link } from "react-router";
 import { Hero } from "../components/Hero";
 import { BrandCarousel } from "../components/BrandCarousel";
@@ -24,8 +25,14 @@ const collections = [
 ];
 
 export default function Home() {
-  const { products, loading } = useProducts();
+  // EXTRACTED 'refresh' here
+  const { products, loading, refresh } = useProducts();
   const featured = products.slice(0, 8);
+
+  // ADDED: Force fresh data fetch when the homepage loads
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   return (
     <>

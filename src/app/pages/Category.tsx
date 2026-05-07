@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react"; // ADDED useEffect
 import { useParams, useSearchParams, Link } from "react-router";
 import { ProductCard } from "../components/ProductCard";
 import { Button } from "../components/ui/button";
@@ -24,7 +24,14 @@ export default function Category() {
   const [price, setPrice] = useState<[number, number]>([0, 1500]);
   const [sort, setSort] = useState("newest");
 
-  const { products, loading } = useProducts();
+  // EXTRACTED 'refresh' here
+  const { products, loading, refresh } = useProducts(); 
+  
+  // ADDED: Force fresh data fetch when the category loads or changes
+  useEffect(() => {
+    refresh();
+  }, [refresh, category]);
+
   const cat = category as CategoryKey;
   const subs = CATEGORIES[cat] || [];
 
