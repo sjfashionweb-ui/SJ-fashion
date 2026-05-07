@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react"; // ADDED useEffect
+import { useMemo, useState, useEffect } from "react";
 import { useParams, useSearchParams, Link } from "react-router";
 import { ProductCard } from "../components/ProductCard";
 import { Button } from "../components/ui/button";
@@ -14,6 +14,9 @@ import { Badge } from "../components/ui/badge";
 import { useProducts } from "../lib/products";
 import { CATEGORIES, CategoryKey, BRANDS, COLORS, SIZES } from "../lib/catalog";
 
+// Maximum price for the LKR slider
+const MAX_PRICE = 50000;
+
 export default function Category() {
   const { category } = useParams<{ category: string }>();
   const [params, setParams] = useSearchParams();
@@ -21,13 +24,13 @@ export default function Category() {
   const [brand, setBrand] = useState("");
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
-  const [price, setPrice] = useState<[number, number]>([0, 1500]);
+  
+  // FIXED: Default price range now goes up to 50,000 LKR
+  const [price, setPrice] = useState<[number, number]>([0, MAX_PRICE]);
   const [sort, setSort] = useState("newest");
 
-  // EXTRACTED 'refresh' here
   const { products, loading, refresh } = useProducts(); 
   
-  // ADDED: Force fresh data fetch when the category loads or changes
   useEffect(() => {
     refresh();
   }, [refresh, category]);
@@ -143,12 +146,13 @@ export default function Category() {
 
           <div>
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">
-              Price: ${price[0]} - ${price[1]}
+              {/* FIXED: Formatted for LKR */}
+              Price: LKR {price[0].toLocaleString()} - LKR {price[1].toLocaleString()}
             </h3>
             <Slider
               min={0}
-              max={1500}
-              step={10}
+              max={MAX_PRICE}
+              step={500}
               value={price}
               onValueChange={(v) => setPrice([v[0], v[1]] as [number, number])}
             />
@@ -162,7 +166,7 @@ export default function Category() {
               setBrand("");
               setSize("");
               setColor("");
-              setPrice([0, 1500]);
+              setPrice([0, MAX_PRICE]);
             }}
           >
             Clear filters
