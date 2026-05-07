@@ -1,11 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 
 const BASE = `https://${projectId}.supabase.co/functions/v1/make-server-8d4aec83`;
 
@@ -53,31 +52,83 @@ async function handle<T>(res: Response, ctx: string): Promise<T> {
   return res.json();
 }
 
+// --- MAGIC METADATA PACKERS ---
+// These functions trick the old backend into saving our new data fields!
+function packMetadata(product: Partial<Product>): Partial<Product> {
+  const payload = { ...product };
+  payload.variants = payload.variants || [];
+  payload.variants = payload.variants.filter(v => v.size !== "__META__");
+  
+  // Pack the new arrays into a hidden variant
+  payload.variants.push({
+    size: "__META__",
+    color: JSON.stringify({
+      images: payload.images || [payload.imageUrl],
+      bulkPricing: payload.bulkPricing || []
+    }),
+    stock: 0
+  });
+  return payload;
+}
+
+function unpackMetadata(product: Product): Product {
+  const metaVariant = product.variants?.find(v => v.size === "__META__");
+  if (metaVariant) {
+    try {
+      const meta = JSON.parse(metaVariant.color);
+      product.images = meta.images || [product.imageUrl];
+      product.bulkPricing = meta.bulkPricing || [];
+    } catch (e) {
+      product.images = [product.imageUrl];
+      product.bulkPricing = [];
+    }
+    // Hide the metadata variant from the UI
+    product.variants = product.variants.filter(v => v.size !== "__META__");
+  } else {
+    product.images = product.images || [product.imageUrl];
+    product.bulkPricing = product.bulkPricing || [];
+  }
+  return product;
+}
+// ------------------------------
+
 export async function listProducts(): Promise<Product[]> {
-  const res = await fetch(`${BASE}/products`, { headers: authHeaders() });
+  // Added cache control to ensure the storefront updates instantly!
+  const res = await fetch(`${BASE}/products`, { 
+    headers: authHeaders(), 
+    cache: 'no-store' 
+  });
   const data = await handle<{ products: Product[] }>(res, "listProducts");
-  return data.products || [];
+  return (data.products || []).map(unpackMetadata);
 }
 
 export async function createProduct(p: Partial<Product>): Promise<Product> {
   const res = await fetch(`${BASE}/products`, {
     method: "POST",
     headers: { ...authHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify(p),
+    body: JSON.stringify(packMetadata(p)),
   });
   const data = await handle<{ product: Product }>(res, "createProduct");
-  return data.product;
+  return unpackMetadata(data.product);
 }
 
-// FIXED: Now correctly pointing to the new Edge Function PUT route!
 export async function updateProduct(id: string, patch: Partial<Product>): Promise<Product> {
-  const res = await fetch(`${BASE}/products/${id}`, {
-    method: "PUT",
+  // 1. Fetch existing product to ensure we don't lose data
+  const existingProducts = await listProducts();
+  const existing = existingProducts.find(p => p.id === id);
+  if (!existing) throw new Error("Product not found");
+
+  // 2. Merge changes
+  const fullUpdate = { ...existing, ...patch, id };
+
+  // 3. Send via POST (The old backend uses POST to overwrite/upsert!)
+  const res = await fetch(`${BASE}/products`, {
+    method: "POST", 
     headers: { ...authHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify(patch),
+    body: JSON.stringify(packMetadata(fullUpdate)),
   });
   const data = await handle<{ product: Product }>(res, "updateProduct");
-  return data.product;
+  return unpackMetadata(data.product);
 }
 
 export async function deleteProduct(id: string): Promise<void> {
