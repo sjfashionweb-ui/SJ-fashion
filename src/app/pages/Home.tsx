@@ -10,17 +10,17 @@ const collections = [
   {
     name: "Men",
     to: "/category/men",
-    img: "https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=800&q=80",
+    img: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/21f1256acbe4014c8e90be997f738f9f.jpg",
   },
   {
     name: "Women",
     to: "/category/women",
-    img: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80",
+    img: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/ce71106f921fd4f032fe01c675144762.webp",
   },
   {
     name: "Kids",
     to: "/category/kids",
-    img: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=800&q=80",
+    img: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/0T2A3477-scaled.jpg",
   },
 ];
 
