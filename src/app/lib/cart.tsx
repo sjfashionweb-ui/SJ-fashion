@@ -1,113 +1,145 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { Product } from "./api";
+import { Link, useNavigate } from "react-router";
+import { Trash2, ShoppingBag, MessageCircle } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { useCart } from "../lib/cart";
+import { createOrder } from "../lib/api";
+import { toast } from "sonner";
+import { useState } from "react";
 
-export type CartItem = {
-  productId: string;
-  name: string;
-  price: number;
-  imageUrl: string;
-  size: string;
-  color: string;
-  qty: number;
+const formatCurrency = (amount: number) => {
+  return `LKR ${amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-type CartCtx = {
-  items: CartItem[];
-  wishlist: string[];
-  add: (p: Product, size: string, color: string, qty?: number) => void;
-  remove: (productId: string, size: string, color: string) => void;
-  setQty: (productId: string, size: string, color: string, qty: number) => void;
-  clear: () => void;
-  toggleWishlist: (productId: string) => void;
-  total: number;
-  count: number;
-};
+// IMPORTANT: Put your WhatsApp number here (Include country code, no '+')
+const WHATSAPP_NUMBER = "94710773717"; 
 
-const Ctx = createContext<CartCtx | null>(null);
+export default function Cart() {
+  const { items, total, setQty, remove, clear } = useCart();
+  const [name, setName] = useState("");
+  const [placing, setPlacing] = useState(false);
+  const nav = useNavigate();
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("sj_cart") || "[]");
-    } catch {
-      return [];
+  const shippingThreshold = 15000;
+  const flatShippingRate = 1500;
+  const shippingCost = total >= shippingThreshold ? 0 : flatShippingRate;
+  const tax = total * 0.08;
+  const grandTotal = total + shippingCost + tax;
+
+  async function checkout() {
+    if (items.length === 0) return;
+    if (!name.trim()) {
+      toast.error("Please enter your name to complete checkout");
+      return;
     }
-  });
-  const [wishlist, setWishlist] = useState<string[]>(() => {
+    setPlacing(true);
+    
     try {
-      return JSON.parse(localStorage.getItem("sj_wishlist") || "[]");
-    } catch {
-      return [];
+      // 1. Create a custom URL-safe order ID based on customer name
+      const safeNameId = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const orderId = `${safeNameId}-${Math.floor(Math.random() * 1000)}`;
+
+      // 2. Build the WhatsApp Invoice Message
+      let msg = `*New Order from: ${name}*\n\n*Order Details:*\n`;
+      items.forEach((i, idx) => {
+        msg += `${idx + 1}. ${i.name}\n   - Size: ${i.size} | Color: ${i.color}\n   - ${i.qty} x ${formatCurrency(i.price)} = ${formatCurrency(i.qty * i.price)}\n\n`;
+      });
+      msg += `*Subtotal:* ${formatCurrency(total)}\n*Shipping:* ${shippingCost === 0 ? "Free" : formatCurrency(shippingCost)}\n*Tax (8%):* ${formatCurrency(tax)}\n*Grand Total: ${formatCurrency(grandTotal)}*`;
+
+      // 3. Save to database using the Custom ID
+      await createOrder({
+        id: orderId, // Passes the custom ID
+        customer: name,
+        items: items.map((i) => ({
+          productId: i.productId,
+          name: i.name,
+          qty: i.qty,
+          price: i.price,
+        })),
+        total: grandTotal,
+        status: "pending",
+      });
+
+      toast.success("Opening WhatsApp to complete order...");
+      clear();
+      
+      // 4. Redirect to WhatsApp
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+      
+      nav("/account");
+    } catch (e) {
+      toast.error(`Checkout failed: ${e}`);
+    } finally {
+      setPlacing(false);
     }
-  });
+  }
 
-  useEffect(() => {
-    localStorage.setItem("sj_cart", JSON.stringify(items));
-  }, [items]);
-  useEffect(() => {
-    localStorage.setItem("sj_wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
-
-  const add: CartCtx["add"] = (p, size, color, qty = 1) => {
-    setItems((curr) => {
-      const idx = curr.findIndex(
-        (i) => i.productId === p.id && i.size === size && i.color === color,
-      );
-      if (idx >= 0) {
-        const next = [...curr];
-        next[idx] = { ...next[idx], qty: next[idx].qty + qty };
-        return next;
-      }
-      return [
-        ...curr,
-        {
-          productId: p.id,
-          name: p.name,
-          price: p.price,
-          imageUrl: p.imageUrl,
-          size,
-          color,
-          qty,
-        },
-      ];
-    });
-  };
-
-  const remove: CartCtx["remove"] = (productId, size, color) => {
-    setItems((c) =>
-      c.filter(
-        (i) => !(i.productId === productId && i.size === size && i.color === color),
-      ),
+  if (items.length === 0)
+    return (
+      <div className="max-w-7xl mx-auto p-20 text-center">
+        <ShoppingBag className="w-16 h-16 mx-auto text-neutral-700 mb-4" />
+        <h1 className="font-display text-4xl mb-2">Your bag is empty</h1>
+        <p className="text-neutral-400 mb-6">Discover beautiful pieces to add to your collection.</p>
+        <Link to="/explore">
+          <Button className="bg-amber-400 hover:bg-amber-500 text-black">Continue Shopping</Button>
+        </Link>
+      </div>
     );
-  };
-
-  const setQty: CartCtx["setQty"] = (productId, size, color, qty) => {
-    setItems((c) =>
-      c.map((i) =>
-        i.productId === productId && i.size === size && i.color === color
-          ? { ...i, qty: Math.max(1, qty) }
-          : i,
-      ),
-    );
-  };
-
-  const toggleWishlist = (id: string) =>
-    setWishlist((w) => (w.includes(id) ? w.filter((x) => x !== id) : [...w, id]));
-
-  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const count = items.reduce((s, i) => s + i.qty, 0);
 
   return (
-    <Ctx.Provider
-      value={{ items, wishlist, add, remove, setQty, clear: () => setItems([]), toggleWishlist, total, count }}
-    >
-      {children}
-    </Ctx.Provider>
+    <div className="max-w-7xl mx-auto px-6 py-12">
+      <h1 className="font-display text-4xl mb-8">Shopping Bag</h1>
+      <div className="grid lg:grid-cols-[1fr_360px] gap-10">
+        <div className="space-y-4">
+          {items.map((i) => (
+            <div
+              key={`${i.productId}-${i.size}-${i.color}`}
+              className="flex gap-4 p-4 bg-white/5 rounded-lg border border-white/10"
+            >
+              <img src={i.imageUrl} alt={i.name} className="w-24 h-32 object-cover rounded" />
+              <div className="flex-1">
+                <Link to={`/product/${i.productId}`} className="hover:text-amber-400">
+                  <h3 className="font-semibold">{i.name}</h3>
+                </Link>
+                <p className="text-xs text-neutral-400">Size: {i.size} · Color: {i.color}</p>
+                <p className="font-semibold mt-2">{formatCurrency(i.price)}</p>
+                <div className="flex items-center gap-3 mt-3">
+                  <div className="flex items-center border border-white/20 rounded">
+                    <button className="w-8 h-8" onClick={() => setQty(i.productId, i.size, i.color, i.qty - 1)}>−</button>
+                    <span className="w-8 text-center text-sm">{i.qty}</span>
+                    <button className="w-8 h-8" onClick={() => setQty(i.productId, i.size, i.color, i.qty + 1)}>+</button>
+                  </div>
+                  <button onClick={() => remove(i.productId, i.size, i.color)} className="text-neutral-500 hover:text-red-400">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <p className="font-semibold text-amber-400">{formatCurrency(i.price * i.qty)}</p>
+            </div>
+          ))}
+        </div>
+        <aside className="bg-white/5 border border-white/10 rounded-lg p-6 h-fit sticky top-28">
+          <h2 className="font-display text-2xl mb-4">Order Summary</h2>
+          <div className="space-y-2 text-sm mb-4">
+            <div className="flex justify-between"><span className="text-neutral-400">Subtotal</span><span>{formatCurrency(total)}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-400">Shipping</span><span>{shippingCost === 0 ? "Free" : formatCurrency(shippingCost)}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-400">Tax</span><span>{formatCurrency(tax)}</span></div>
+          </div>
+          <div className="flex justify-between font-bold text-lg pt-3 border-t border-white/10 mb-6">
+            <span>Total</span>
+            <span className="text-amber-400">{formatCurrency(grandTotal)}</span>
+          </div>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your full name"
+            className="w-full mb-4 bg-neutral-900 border border-white/20 rounded px-4 py-3 text-sm outline-none focus:border-amber-400 text-white transition-colors"
+          />
+          <Button onClick={checkout} disabled={placing} className="w-full h-12 bg-amber-400 hover:bg-amber-500 text-black font-bold tracking-widest uppercase flex items-center justify-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            {placing ? "Processing..." : "Checkout via WhatsApp"}
+          </Button>
+        </aside>
+      </div>
+    </div>
   );
-}
-
-export function useCart() {
-  const v = useContext(Ctx);
-  if (!v) throw new Error("useCart must be used inside CartProvider");
-  return v;
 }
