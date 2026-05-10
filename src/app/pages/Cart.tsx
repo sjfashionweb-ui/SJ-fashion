@@ -1,15 +1,17 @@
 import { Link, useNavigate } from "react-router";
-import { Trash2, ShoppingBag } from "lucide-react";
+import { Trash2, ShoppingBag, MessageCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { useCart } from "../lib/cart";
 import { createOrder } from "../lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
 
-// Helper function to format LKR
 const formatCurrency = (amount: number) => {
   return `LKR ${amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
+
+// IMPORTANT: Put your WhatsApp number here (Include country code, no '+')
+const WHATSAPP_NUMBER = "94770000000"; 
 
 export default function Cart() {
   const { items, total, setQty, remove, clear } = useCart();
@@ -17,7 +19,6 @@ export default function Cart() {
   const [placing, setPlacing] = useState(false);
   const nav = useNavigate();
 
-  // Updated shipping logic for LKR
   const shippingThreshold = 15000;
   const flatShippingRate = 1500;
   const shippingCost = total >= shippingThreshold ? 0 : flatShippingRate;
@@ -26,21 +27,44 @@ export default function Cart() {
 
   async function checkout() {
     if (items.length === 0) return;
+    if (!name.trim()) {
+      toast.error("Please enter your name to complete checkout");
+      return;
+    }
     setPlacing(true);
+    
     try {
+      // 1. Create a custom URL-safe order ID based on customer name
+      const safeNameId = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const orderId = `${safeNameId}-${Math.floor(Math.random() * 1000)}`;
+
+      // 2. Build the WhatsApp Invoice Message
+      let msg = `*New Order from: ${name}*\n\n*Order Details:*\n`;
+      items.forEach((i, idx) => {
+        msg += `${idx + 1}. ${i.name}\n   - Size: ${i.size} | Color: ${i.color}\n   - ${i.qty} x ${formatCurrency(i.price)} = ${formatCurrency(i.qty * i.price)}\n\n`;
+      });
+      msg += `*Subtotal:* ${formatCurrency(total)}\n*Shipping:* ${shippingCost === 0 ? "Free" : formatCurrency(shippingCost)}\n*Tax (8%):* ${formatCurrency(tax)}\n*Grand Total: ${formatCurrency(grandTotal)}*`;
+
+      // 3. Save to database using the Custom ID
       await createOrder({
-        customer: name || "Guest",
+        id: orderId, // Passes the custom ID
+        customer: name,
         items: items.map((i) => ({
           productId: i.productId,
           name: i.name,
           qty: i.qty,
           price: i.price,
         })),
-        total: grandTotal, // Make sure we pass the final calculated total including tax/shipping
+        total: grandTotal,
         status: "pending",
       });
-      toast.success("Order placed! Thank you.");
+
+      toast.success("Opening WhatsApp to complete order...");
       clear();
+      
+      // 4. Redirect to WhatsApp
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+      
       nav("/account");
     } catch (e) {
       toast.error(`Checkout failed: ${e}`);
@@ -89,7 +113,7 @@ export default function Cart() {
                   </button>
                 </div>
               </div>
-              <p className="font-semibold">{formatCurrency(i.price * i.qty)}</p>
+              <p className="font-semibold text-amber-400">{formatCurrency(i.price * i.qty)}</p>
             </div>
           ))}
         </div>
@@ -102,16 +126,17 @@ export default function Cart() {
           </div>
           <div className="flex justify-between font-bold text-lg pt-3 border-t border-white/10 mb-6">
             <span>Total</span>
-            <span>{formatCurrency(grandTotal)}</span>
+            <span className="text-amber-400">{formatCurrency(grandTotal)}</span>
           </div>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            className="w-full mb-3 bg-white/5 border border-white/10 rounded px-3 py-2 text-sm outline-none focus:border-amber-400"
+            placeholder="Enter your full name"
+            className="w-full mb-4 bg-neutral-900 border border-white/20 rounded px-4 py-3 text-sm outline-none focus:border-amber-400 text-white transition-colors"
           />
-          <Button onClick={checkout} disabled={placing} className="w-full bg-amber-400 hover:bg-amber-500 text-black">
-            {placing ? "Placing order..." : "Checkout"}
+          <Button onClick={checkout} disabled={placing} className="w-full h-12 bg-amber-400 hover:bg-amber-500 text-black font-bold tracking-widest uppercase flex items-center justify-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            {placing ? "Processing..." : "Checkout via WhatsApp"}
           </Button>
         </aside>
       </div>
