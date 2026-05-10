@@ -18,6 +18,7 @@ export function AddProductForm({ onCreated }: Props) {
   const [category, setCategory] = useState<CategoryKey>("men");
   const [subcategory, setSubcategory] = useState("");
   const [brand, setBrand] = useState("");
+  const [customBrand, setCustomBrand] = useState(""); // NEW: State for custom brand
   const [price, setPrice] = useState("");
   
   const [images, setImages] = useState<string[]>([]);
@@ -46,20 +47,12 @@ export function AddProductForm({ onCreated }: Props) {
     }
   }
 
-  function removeImage(index: number) {
-    setImages(images.filter((_, i) => i !== index));
-  }
-
+  function removeImage(index: number) { setImages(images.filter((_, i) => i !== index)); }
   function addTier() { setBulkPricing([...bulkPricing, { minQty: 10, price: 0 }]); }
-  function updateTier(i: number, patch: Partial<{ minQty: number; price: number }>) {
-    setBulkPricing(bulkPricing.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
-  }
+  function updateTier(i: number, patch: Partial<{ minQty: number; price: number }>) { setBulkPricing(bulkPricing.map((t, idx) => (idx === i ? { ...t, ...patch } : t))); }
   function removeTier(i: number) { setBulkPricing(bulkPricing.filter((_, idx) => idx !== i)); }
-
   function addVariant() { setVariants([...variants, { size: "M", color: "Black", stock: 0 }]); }
-  function updateVariant(i: number, patch: Partial<Variant>) {
-    setVariants(variants.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
-  }
+  function updateVariant(i: number, patch: Partial<Variant>) { setVariants(variants.map((v, idx) => (idx === i ? { ...v, ...patch } : v))); }
   function removeVariant(i: number) { setVariants(variants.filter((_, idx) => idx !== i)); }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -69,17 +62,20 @@ export function AddProductForm({ onCreated }: Props) {
       return;
     }
     setSubmitting(true);
+    
+    // NEW: Use the custom brand if "Other" is selected
+    const finalBrand = brand === "Other" ? customBrand.trim() : brand;
+
     try {
-      // NEW: Create a URL-safe ID from the product name
       const productId = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
       await createProduct({
-        id: productId, // Pass custom ID
+        id: productId,
         name,
         description,
         category,
         subcategory,
-        brand,
+        brand: finalBrand, // Pass the final brand here
         price: Number(price),
         imageUrl: images[0],
         images,
@@ -87,7 +83,7 @@ export function AddProductForm({ onCreated }: Props) {
         variants,
       });
       toast.success("Product created");
-      setName(""); setDescription(""); setSubcategory(""); setBrand(""); setPrice("");
+      setName(""); setDescription(""); setSubcategory(""); setBrand(""); setCustomBrand(""); setPrice("");
       setImages([]); setBulkPricing([]); setVariants([{ size: "M", color: "Black", stock: 10 }]);
       onCreated();
     } catch (err) {
@@ -133,8 +129,18 @@ export function AddProductForm({ onCreated }: Props) {
                   <SelectTrigger className="bg-neutral-950 border-white/10"><SelectValue placeholder="Pick..." /></SelectTrigger>
                   <SelectContent className="bg-neutral-900 border-white/10 text-white">
                     {BRANDS.map((b) => (<SelectItem key={b.name} value={b.name}>{b.name}</SelectItem>))}
+                    <SelectItem value="Other" className="text-amber-400 font-bold">Other (Custom)</SelectItem>
                   </SelectContent>
                 </Select>
+                {brand === "Other" && (
+                  <Input 
+                    placeholder="Type brand name..." 
+                    value={customBrand} 
+                    onChange={(e) => setCustomBrand(e.target.value)} 
+                    className="bg-neutral-950 border-amber-400/50 mt-2 focus:border-amber-400" 
+                    required
+                  />
+                )}
               </div>
               <div><Label>Base Price (LKR)</Label><Input className="bg-neutral-950 border-white/10" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="For Qty: 1" /></div>
             </div>

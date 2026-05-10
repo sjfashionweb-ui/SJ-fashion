@@ -2,19 +2,12 @@ import { useMemo, useState, useEffect } from "react";
 import { useParams, useSearchParams, Link } from "react-router";
 import { ProductCard } from "../components/ProductCard";
 import { Button } from "../components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Slider } from "../components/ui/slider";
 import { Badge } from "../components/ui/badge";
 import { useProducts } from "../lib/products";
-import { CATEGORIES, CategoryKey, BRANDS, COLORS, SIZES } from "../lib/catalog";
+import { CATEGORIES, CategoryKey, COLORS, SIZES } from "../lib/catalog";
 
-// Maximum price for the LKR slider
 const MAX_PRICE = 50000;
 
 export default function Category() {
@@ -24,8 +17,6 @@ export default function Category() {
   const [brand, setBrand] = useState("");
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
-  
-  // FIXED: Default price range now goes up to 50,000 LKR
   const [price, setPrice] = useState<[number, number]>([0, MAX_PRICE]);
   const [sort, setSort] = useState("newest");
 
@@ -37,6 +28,12 @@ export default function Category() {
 
   const cat = category as CategoryKey;
   const subs = CATEGORIES[cat] || [];
+
+  // NEW: Dynamically grab all unique brands from the database
+  const uniqueBrands = useMemo(() => {
+    const allBrands = new Set(products.map(p => p.brand).filter(Boolean));
+    return Array.from(allBrands).sort();
+  }, [products]);
 
   const filtered = useMemo(() => {
     let list = products.filter((p) => p.category === cat);
@@ -62,8 +59,7 @@ export default function Category() {
 
   function setSub(s: string) {
     const next = new URLSearchParams(params);
-    if (s) next.set("sub", s);
-    else next.delete("sub");
+    if (s) next.set("sub", s); else next.delete("sub");
     setParams(next);
   }
 
@@ -81,20 +77,9 @@ export default function Category() {
           <div>
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">Subcategory</h3>
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSub("")}
-                className={`text-xs px-3 py-1.5 rounded-full border ${!sub ? "bg-amber-400 text-black border-amber-400" : "border-white/20 text-neutral-300 hover:border-amber-400"}`}
-              >
-                All
-              </button>
+              <button onClick={() => setSub("")} className={`text-xs px-3 py-1.5 rounded-full border ${!sub ? "bg-amber-400 text-black border-amber-400" : "border-white/20 text-neutral-300 hover:border-amber-400"}`}>All</button>
               {subs.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSub(s)}
-                  className={`text-xs px-3 py-1.5 rounded-full border ${sub === s ? "bg-amber-400 text-black border-amber-400" : "border-white/20 text-neutral-300 hover:border-amber-400"}`}
-                >
-                  {s}
-                </button>
+                <button key={s} onClick={() => setSub(s)} className={`text-xs px-3 py-1.5 rounded-full border ${sub === s ? "bg-amber-400 text-black border-amber-400" : "border-white/20 text-neutral-300 hover:border-amber-400"}`}>{s}</button>
               ))}
             </div>
           </div>
@@ -102,13 +87,12 @@ export default function Category() {
           <div>
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">Brand</h3>
             <Select value={brand} onValueChange={setBrand}>
-              <SelectTrigger className="bg-white/5 border-white/10">
-                <SelectValue placeholder="All brands" />
-              </SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10"><SelectValue placeholder="All brands" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All brands</SelectItem>
-                {BRANDS.map((b) => (
-                  <SelectItem key={b.name} value={b.name}>{b.name}</SelectItem>
+                {/* NEW: Maps over the dynamic brands we found in the database */}
+                {uniqueBrands.map((bName) => (
+                  <SelectItem key={bName} value={bName}>{bName}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -118,13 +102,7 @@ export default function Category() {
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">Size</h3>
             <div className="flex flex-wrap gap-2">
               {SIZES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(size === s ? "" : s)}
-                  className={`w-10 h-10 rounded border text-xs ${size === s ? "bg-amber-400 text-black border-amber-400" : "border-white/20 hover:border-amber-400"}`}
-                >
-                  {s}
-                </button>
+                <button key={s} onClick={() => setSize(size === s ? "" : s)} className={`w-10 h-10 rounded border text-xs ${size === s ? "bg-amber-400 text-black border-amber-400" : "border-white/20 hover:border-amber-400"}`}>{s}</button>
               ))}
             </div>
           </div>
@@ -133,42 +111,19 @@ export default function Category() {
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">Color</h3>
             <div className="flex flex-wrap gap-2">
               {COLORS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setColor(color === c ? "" : c)}
-                  className={`text-xs px-3 py-1.5 rounded-full border ${color === c ? "bg-amber-400 text-black border-amber-400" : "border-white/20 text-neutral-300 hover:border-amber-400"}`}
-                >
-                  {c}
-                </button>
+                <button key={c} onClick={() => setColor(color === c ? "" : c)} className={`text-xs px-3 py-1.5 rounded-full border ${color === c ? "bg-amber-400 text-black border-amber-400" : "border-white/20 text-neutral-300 hover:border-amber-400"}`}>{c}</button>
               ))}
             </div>
           </div>
 
           <div>
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">
-              {/* FIXED: Formatted for LKR */}
               Price: LKR {price[0].toLocaleString()} - LKR {price[1].toLocaleString()}
             </h3>
-            <Slider
-              min={0}
-              max={MAX_PRICE}
-              step={500}
-              value={price}
-              onValueChange={(v) => setPrice([v[0], v[1]] as [number, number])}
-            />
+            <Slider min={0} max={MAX_PRICE} step={500} value={price} onValueChange={(v) => setPrice([v[0], v[1]] as [number, number])} />
           </div>
 
-          <Button
-            variant="outline"
-            className="w-full border-white/20"
-            onClick={() => {
-              setSub("");
-              setBrand("");
-              setSize("");
-              setColor("");
-              setPrice([0, MAX_PRICE]);
-            }}
-          >
+          <Button variant="outline" className="w-full border-white/20" onClick={() => { setSub(""); setBrand(""); setSize(""); setColor(""); setPrice([0, MAX_PRICE]); }}>
             Clear filters
           </Button>
         </aside>
@@ -176,26 +131,12 @@ export default function Category() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-wrap gap-2">
-              {brand && brand !== "all" && (
-                <Badge className="bg-amber-400 text-black" onClick={() => setBrand("")}>
-                  {brand} ✕
-                </Badge>
-              )}
-              {size && (
-                <Badge className="bg-amber-400 text-black" onClick={() => setSize("")}>
-                  Size {size} ✕
-                </Badge>
-              )}
-              {color && (
-                <Badge className="bg-amber-400 text-black" onClick={() => setColor("")}>
-                  {color} ✕
-                </Badge>
-              )}
+              {brand && brand !== "all" && <Badge className="bg-amber-400 text-black" onClick={() => setBrand("")}>{brand} ✕</Badge>}
+              {size && <Badge className="bg-amber-400 text-black" onClick={() => setSize("")}>Size {size} ✕</Badge>}
+              {color && <Badge className="bg-amber-400 text-black" onClick={() => setColor("")}>{color} ✕</Badge>}
             </div>
             <Select value={sort} onValueChange={setSort}>
-              <SelectTrigger className="w-44 bg-white/5 border-white/10">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger className="w-44 bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Newest</SelectItem>
                 <SelectItem value="low">Price: Low → High</SelectItem>
@@ -213,9 +154,7 @@ export default function Category() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {filtered.map((p) => (
-                <ProductCard key={p.id} p={p} />
-              ))}
+              {filtered.map((p) => (<ProductCard key={p.id} p={p} />))}
             </div>
           )}
         </div>

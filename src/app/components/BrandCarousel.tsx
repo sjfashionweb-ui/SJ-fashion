@@ -1,9 +1,20 @@
 import { motion } from "motion/react";
-import { Link } from "react-router";
-import { BRANDS } from "../lib/catalog";
 
 export function BrandCarousel() {
-  const loop = [...BRANDS, ...BRANDS];
+  // High-quality transparent SVG logos
+  const logos = [
+    { name: "Nike", url: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" },
+    { name: "Adidas", url: "https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg" },
+    { name: "Gucci", url: "https://upload.wikimedia.org/wikipedia/commons/c/ca/Gucci_logo.svg" },
+    { name: "Zara", url: "https://upload.wikimedia.org/wikipedia/commons/f/fd/Zara_Logo.svg" },
+    { name: "Levi's", url: "https://upload.wikimedia.org/wikipedia/commons/1/11/Levi%27s_logo.svg" },
+    { name: "Puma", url: "https://upload.wikimedia.org/wikipedia/commons/a/aa/Puma_Logo.svg" },
+    { name: "H&M", url: "https://upload.wikimedia.org/wikipedia/commons/5/53/H%26M-Logo.svg" },
+    { name: "Calvin Klein", url: "https://upload.wikimedia.org/wikipedia/commons/e/ea/Calvin_klein_logo.svg" },
+  ];
+
+  const loop = [...logos, ...logos, ...logos];
+
   return (
     <section className="py-16 bg-neutral-950 border-y border-white/5 overflow-hidden">
       <div className="text-center mb-10">
@@ -16,29 +27,19 @@ export function BrandCarousel() {
         <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-neutral-950 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-neutral-950 to-transparent z-10 pointer-events-none" />
         <motion.div
-          className="flex gap-6 w-max"
+          className="flex items-center gap-16 md:gap-24 w-max px-8"
           animate={{ x: ["0%", "-50%"] }}
           transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
         >
-          {loop.map((b, i) => (
-            <Link
-              key={`${b.name}-${i}`}
-              to={`/brand/${encodeURIComponent(b.name)}`}
-              className="flex items-center justify-center bg-white/5 border border-white/10 rounded-xl w-44 h-28 px-6 shrink-0 hover:bg-white/10 hover:border-amber-400/50 transition-all group"
-              title={b.name}
-            >
-              <img
-                src={b.logo}
-                alt={b.name}
-                className="max-h-12 max-w-full object-contain brightness-0 invert opacity-80 group-hover:opacity-100 transition"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                  const sib = e.currentTarget.nextElementSibling as HTMLElement | null;
-                  if (sib) sib.style.display = "block";
-                }}
+          {loop.map((logo, i) => (
+            <div key={i} className="flex-shrink-0">
+              <img 
+                src={logo.url} 
+                alt={logo.name} 
+                className="h-8 md:h-12 object-contain opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300"
+                style={{ filter: logo.name === 'Levi\'s' || logo.name === 'H&M' ? 'none' : 'invert(1)' }}
               />
-              <span className="hidden font-heading text-lg text-white">{b.name}</span>
-            </Link>
+            </div>
           ))}
         </motion.div>
       </div>
