@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { toast } from "sonner";
 import { createProduct, uploadImage, Variant } from "../../lib/api";
-import { CATEGORIES, CategoryKey, SIZES, COLORS, BRANDS } from "../../lib/catalog";
+import { CATEGORIES, CategoryKey, BRANDS } from "../../lib/catalog";
 
 type Props = { onCreated: () => void };
 
@@ -18,7 +18,7 @@ export function AddProductForm({ onCreated }: Props) {
   const [category, setCategory] = useState<CategoryKey>("men");
   const [subcategory, setSubcategory] = useState("");
   const [brand, setBrand] = useState("");
-  const [customBrand, setCustomBrand] = useState(""); // NEW: State for custom brand
+  const [customBrand, setCustomBrand] = useState("");
   const [price, setPrice] = useState("");
   
   const [images, setImages] = useState<string[]>([]);
@@ -26,10 +26,7 @@ export function AddProductForm({ onCreated }: Props) {
   const [submitting, setSubmitting] = useState(false);
   
   const [bulkPricing, setBulkPricing] = useState<{ minQty: number; price: number }[]>([]);
-
-  const [variants, setVariants] = useState<Variant[]>([
-    { size: "M", color: "Black", stock: 10 },
-  ]);
+  const [variants, setVariants] = useState<Variant[]>([{ size: "M", color: "Black", stock: 10 }]);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -51,7 +48,7 @@ export function AddProductForm({ onCreated }: Props) {
   function addTier() { setBulkPricing([...bulkPricing, { minQty: 10, price: 0 }]); }
   function updateTier(i: number, patch: Partial<{ minQty: number; price: number }>) { setBulkPricing(bulkPricing.map((t, idx) => (idx === i ? { ...t, ...patch } : t))); }
   function removeTier(i: number) { setBulkPricing(bulkPricing.filter((_, idx) => idx !== i)); }
-  function addVariant() { setVariants([...variants, { size: "M", color: "Black", stock: 0 }]); }
+  function addVariant() { setVariants([...variants, { size: "", color: "", stock: 0 }]); }
   function updateVariant(i: number, patch: Partial<Variant>) { setVariants(variants.map((v, idx) => (idx === i ? { ...v, ...patch } : v))); }
   function removeVariant(i: number) { setVariants(variants.filter((_, idx) => idx !== i)); }
 
@@ -63,7 +60,6 @@ export function AddProductForm({ onCreated }: Props) {
     }
     setSubmitting(true);
     
-    // NEW: Use the custom brand if "Other" is selected
     const finalBrand = brand === "Other" ? customBrand.trim() : brand;
 
     try {
@@ -75,7 +71,7 @@ export function AddProductForm({ onCreated }: Props) {
         description,
         category,
         subcategory,
-        brand: finalBrand, // Pass the final brand here
+        brand: finalBrand,
         price: Number(price),
         imageUrl: images[0],
         images,
@@ -109,6 +105,7 @@ export function AddProductForm({ onCreated }: Props) {
                   <SelectTrigger className="bg-neutral-950 border-white/10"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-neutral-900 border-white/10 text-white">
                     <SelectItem value="men">Men</SelectItem><SelectItem value="women">Women</SelectItem><SelectItem value="kids">Kids</SelectItem>
+                    <SelectItem value="unisex" className="text-amber-400">Unisex</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -117,7 +114,7 @@ export function AddProductForm({ onCreated }: Props) {
                 <Select value={subcategory} onValueChange={setSubcategory}>
                   <SelectTrigger className="bg-neutral-950 border-white/10"><SelectValue placeholder="Pick..." /></SelectTrigger>
                   <SelectContent className="bg-neutral-900 border-white/10 text-white">
-                    {CATEGORIES[category].map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+                    {CATEGORIES[category]?.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
@@ -133,13 +130,7 @@ export function AddProductForm({ onCreated }: Props) {
                   </SelectContent>
                 </Select>
                 {brand === "Other" && (
-                  <Input 
-                    placeholder="Type brand name..." 
-                    value={customBrand} 
-                    onChange={(e) => setCustomBrand(e.target.value)} 
-                    className="bg-neutral-950 border-amber-400/50 mt-2 focus:border-amber-400" 
-                    required
-                  />
+                  <Input placeholder="Type brand name..." value={customBrand} onChange={(e) => setCustomBrand(e.target.value)} className="bg-neutral-950 border-amber-400/50 mt-2 focus:border-amber-400" required />
                 )}
               </div>
               <div><Label>Base Price (LKR)</Label><Input className="bg-neutral-950 border-white/10" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="For Qty: 1" /></div>
@@ -181,22 +172,18 @@ export function AddProductForm({ onCreated }: Props) {
               <div className="space-y-2 max-h-[250px] overflow-auto pr-1">
                 {variants.map((v, i) => (
                   <div key={i} className="grid grid-cols-[1fr_1fr_90px_auto] gap-2 items-end p-3 border border-white/10 rounded-lg bg-neutral-950">
-                    <div>
-                      <Label className="text-xs">Size</Label>
-                      <Select value={v.size} onValueChange={(val) => updateVariant(i, { size: val })}>
-                        <SelectTrigger className="bg-neutral-900 border-white/10"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-neutral-900 border-white/10 text-white">{SIZES.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}</SelectContent>
-                      </Select>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-neutral-400">Size</Label>
+                      {/* NEW: Input instead of Select */}
+                      <Input placeholder="e.g. 32, XL, Free" className="bg-neutral-900 border-white/10 h-8 text-sm text-white" value={v.size} onChange={(e) => updateVariant(i, { size: e.target.value })} />
                     </div>
-                    <div>
-                      <Label className="text-xs">Color</Label>
-                      <Select value={v.color} onValueChange={(val) => updateVariant(i, { color: val })}>
-                        <SelectTrigger className="bg-neutral-900 border-white/10"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-neutral-900 border-white/10 text-white">{COLORS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}</SelectContent>
-                      </Select>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-neutral-400">Color</Label>
+                      {/* NEW: Input instead of Select */}
+                      <Input placeholder="e.g. Navy, Red, #ff0000" className="bg-neutral-900 border-white/10 h-8 text-sm text-white" value={v.color} onChange={(e) => updateVariant(i, { color: e.target.value })} />
                     </div>
-                    <div><Label className="text-xs">Stock</Label><Input type="number" className="bg-neutral-900 border-white/10" value={v.stock} onChange={(e) => updateVariant(i, { stock: Number(e.target.value) })} /></div>
-                    <Button type="button" size="icon" variant="ghost" onClick={() => removeVariant(i)} className="hover:text-red-400"><Trash2 className="w-4 h-4" /></Button>
+                    <div className="space-y-1"><Label className="text-xs text-neutral-400">Stock</Label><Input type="number" className="bg-neutral-900 border-white/10 h-8" value={v.stock} onChange={(e) => updateVariant(i, { stock: Number(e.target.value) })} /></div>
+                    <Button type="button" size="icon" variant="ghost" onClick={() => removeVariant(i)} className="h-8 w-8 hover:text-red-400 mb-0.5"><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 ))}
               </div>

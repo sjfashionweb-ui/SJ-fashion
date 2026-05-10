@@ -4,7 +4,6 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Product } from "../lib/api";
 import { useCart } from "../lib/cart";
 
-// Formatter to match your LKR styling
 const formatLKR = (amount: number) => {
   return amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
@@ -13,15 +12,12 @@ export function ProductCard({ p }: { p: Product }) {
   const { wishlist, toggleWishlist } = useCart();
   const liked = wishlist.includes(p.id);
   
-  // 1. Determine if the product has bulk tiers
   const hasBulkPricing = p.bulkPricing && p.bulkPricing.length > 0;
   
-  // 2. Generate the dynamic price display
   let priceDisplay;
   if (hasBulkPricing) {
-    // Find the absolute lowest price in the bulk tiers
     const minPrice = Math.min(...p.bulkPricing!.map(tier => tier.price));
-    const maxPrice = p.price; // The base price for 1 item
+    const maxPrice = p.price;
     
     priceDisplay = (
       <div className="flex flex-col mt-1">
@@ -32,7 +28,6 @@ export function ProductCard({ p }: { p: Product }) {
       </div>
     );
   } else {
-    // Standard single-price display for items without bulk tiers
     priceDisplay = (
       <span className="text-sm font-semibold text-white mt-1 block">
         LKR {formatLKR(p.price)}
@@ -40,8 +35,10 @@ export function ProductCard({ p }: { p: Product }) {
     );
   }
 
-  // Handle the new images array or fallback to the old imageUrl
   const displayImage = (p.images && p.images.length > 0) ? p.images[0] : p.imageUrl;
+
+  // NEW: Extract unique colors from variants to render color balls
+  const colors = Array.from(new Set(p.variants?.map((v) => v.color).filter(Boolean)));
 
   return (
     <div className="group">
@@ -63,17 +60,34 @@ export function ProductCard({ p }: { p: Product }) {
           <Heart className={`w-4 h-4 ${liked ? "fill-amber-400 text-amber-400" : "text-white"}`} />
         </button>
 
-        {/* 3. Bulk Savings Badge */}
         {hasBulkPricing && (
           <span className="absolute top-3 left-3 bg-amber-400 text-black text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest shadow-lg">
             WHOLESALE
           </span>
         )}
       </div>
-      <Link to={`/product/${p.id}`}>
+      
+      <Link to={`/product/${p.id}`} className="block">
         <p className="text-[10px] tracking-[0.2em] uppercase text-amber-400 mb-1">{p.brand}</p>
-        <h3 className="text-sm text-white mb-1 group-hover:text-amber-400 transition">{p.name}</h3>
+        <h3 className="text-sm text-white mb-1 group-hover:text-amber-400 transition truncate">{p.name}</h3>
         {priceDisplay}
+        
+        {/* NEW: Render the Color Balls */}
+        {colors.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {colors.map(colorName => (
+              <div 
+                key={colorName} 
+                title={colorName}
+                className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm"
+                style={{ 
+                  // Strip spaces so "Light Blue" becomes "lightblue" which CSS understands
+                  backgroundColor: colorName.toLowerCase().replace(/\s/g, '') 
+                }}
+              />
+            ))}
+          </div>
+        )}
       </Link>
     </div>
   );

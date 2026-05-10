@@ -1,39 +1,8 @@
 export const CATEGORIES = {
-  men: [
-    "T-Shirts",
-    "Shirts",
-    "Jeans",
-    "Trousers",
-    "Jackets",
-    "Hoodies",
-    "Suits",
-    "Activewear",
-    "Innerwear",
-    "Footwear",
-  ],
-  women: [
-    "Dresses",
-    "Tops",
-    "Jeans",
-    "Skirts",
-    "Sarees",
-    "Kurtas",
-    "Jackets",
-    "Activewear",
-    "Lingerie",
-    "Footwear",
-  ],
-  kids: [
-    "Boys T-Shirts",
-    "Boys Jeans",
-    "Girls Dresses",
-    "Girls Tops",
-    "Sleepwear",
-    "School Uniforms",
-    "Activewear",
-    "Footwear",
-    "Infant Wear",
-  ],
+  men: ["T-Shirts", "Shirts", "Jeans", "Trousers", "Jackets", "Hoodies", "Suits", "Activewear", "Innerwear", "Footwear"],
+  women: ["Dresses", "Tops", "Jeans", "Skirts", "Sarees", "Kurtas", "Jackets", "Activewear", "Lingerie", "Footwear"],
+  kids: ["Boys T-Shirts", "Boys Jeans", "Girls Dresses", "Girls Tops", "Sleepwear", "School Uniforms", "Activewear", "Footwear", "Infant Wear"],
+  unisex: ["T-Shirts", "Hoodies", "Sweatpants", "Jeans", "Jackets", "Accessories", "Footwear", "Bags"], // <-- NEW: Unisex categories
 } as const;
 
 export type CategoryKey = keyof typeof CATEGORIES;
@@ -57,15 +26,4 @@ export const BRANDS: { name: string; logo: string }[] = [
 ];
 
 export const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-export const COLORS = [
-  "Black",
-  "White",
-  "Red",
-  "Blue",
-  "Green",
-  "Yellow",
-  "Pink",
-  "Grey",
-  "Beige",
-  "Navy",
-];
+export const COLORS = ["Black", "White", "Red", "Blue", "Green", "Yellow", "Pink", "Grey", "Beige", "Navy"];

@@ -23,7 +23,7 @@ export type Product = {
   id: string;
   name: string;
   description: string;
-  category: "men" | "women" | "kids";
+  category: "men" | "women" | "kids" | "unisex"; // <-- NEW: Added unisex
   subcategory: string;
   brand: string;
   price: number;
@@ -52,14 +52,11 @@ async function handle<T>(res: Response, ctx: string): Promise<T> {
   return res.json();
 }
 
-// --- MAGIC METADATA PACKERS ---
-// These functions trick the old backend into saving our new data fields!
 function packMetadata(product: Partial<Product>): Partial<Product> {
   const payload = { ...product };
   payload.variants = payload.variants || [];
   payload.variants = payload.variants.filter(v => v.size !== "__META__");
   
-  // Pack the new arrays into a hidden variant
   payload.variants.push({
     size: "__META__",
     color: JSON.stringify({
@@ -82,7 +79,6 @@ function unpackMetadata(product: Product): Product {
       product.images = [product.imageUrl];
       product.bulkPricing = [];
     }
-    // Hide the metadata variant from the UI
     product.variants = product.variants.filter(v => v.size !== "__META__");
   } else {
     product.images = product.images || [product.imageUrl];
@@ -90,14 +86,9 @@ function unpackMetadata(product: Product): Product {
   }
   return product;
 }
-// ------------------------------
 
 export async function listProducts(): Promise<Product[]> {
-  // Added cache control to ensure the storefront updates instantly!
-  const res = await fetch(`${BASE}/products`, { 
-    headers: authHeaders(), 
-    cache: 'no-store' 
-  });
+  const res = await fetch(`${BASE}/products`, { headers: authHeaders(), cache: 'no-store' });
   const data = await handle<{ products: Product[] }>(res, "listProducts");
   return (data.products || []).map(unpackMetadata);
 }
@@ -113,15 +104,12 @@ export async function createProduct(p: Partial<Product>): Promise<Product> {
 }
 
 export async function updateProduct(id: string, patch: Partial<Product>): Promise<Product> {
-  // 1. Fetch existing product to ensure we don't lose data
   const existingProducts = await listProducts();
   const existing = existingProducts.find(p => p.id === id);
   if (!existing) throw new Error("Product not found");
 
-  // 2. Merge changes
   const fullUpdate = { ...existing, ...patch, id };
 
-  // 3. Send via POST (The old backend uses POST to overwrite/upsert!)
   const res = await fetch(`${BASE}/products`, {
     method: "POST", 
     headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -132,23 +120,14 @@ export async function updateProduct(id: string, patch: Partial<Product>): Promis
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const res = await fetch(`${BASE}/products/${id}`, {
-    method: "DELETE",
-    headers: authHeaders(),
-  });
+  const res = await fetch(`${BASE}/products/${id}`, { method: "DELETE", headers: authHeaders() });
   await handle(res, "deleteProduct");
 }
 
-export async function uploadImage(
-  file: File,
-): Promise<{ url: string; path: string }> {
+export async function uploadImage(file: File): Promise<{ url: string; path: string }> {
   const fd = new FormData();
   fd.append("file", file);
-  const res = await fetch(`${BASE}/upload`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: fd,
-  });
+  const res = await fetch(`${BASE}/upload`, { method: "POST", headers: authHeaders(), body: fd });
   return handle<{ url: string; path: string }>(res, "uploadImage");
 }
 
@@ -169,17 +148,11 @@ export async function createOrder(o: Partial<Order>): Promise<Order> {
 }
 
 export async function seedProducts(force = false): Promise<{ created?: number; skipped?: boolean }> {
-  const res = await fetch(`${BASE}/seed${force ? "?force=1" : ""}`, {
-    method: "POST",
-    headers: authHeaders(),
-  });
+  const res = await fetch(`${BASE}/seed${force ? "?force=1" : ""}`, { method: "POST", headers: authHeaders() });
   return handle(res, "seedProducts");
 }
 
-export async function updateOrder(
-  id: string,
-  patch: Partial<Order>,
-): Promise<Order> {
+export async function updateOrder(id: string, patch: Partial<Order>): Promise<Order> {
   const res = await fetch(`${BASE}/orders/${id}`, {
     method: "PUT",
     headers: { ...authHeaders(), "Content-Type": "application/json" },
