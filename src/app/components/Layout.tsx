@@ -1,6 +1,6 @@
-import { Link, NavLink, Outlet, useNavigate } from "react-router";
-import { Search, ShoppingBag, Heart, User } from "lucide-react";
-import { useState } from "react";
+import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router";
+import { Search, ShoppingBag, Heart, User, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { MegaMenu } from "./MegaMenu";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -11,10 +11,22 @@ export function Layout() {
   const { count, wishlist } = useCart();
   const [q, setQ] = useState("");
   const nav = useNavigate();
+  const location = useLocation();
+
+  // NEW: State to control the mobile slide-out menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // NEW: Automatically close the mobile menu whenever the page changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (q.trim()) nav(`/search?q=${encodeURIComponent(q.trim())}`);
+    if (q.trim()) {
+      nav(`/search?q=${encodeURIComponent(q.trim())}`);
+      setIsMobileMenuOpen(false); // Close menu if search is submitted from mobile
+    }
   };
 
   const navLink = ({ isActive }: { isActive: boolean }) =>
@@ -22,8 +34,14 @@ export function Layout() {
       isActive ? "text-amber-400" : "text-white hover:text-amber-400"
     }`;
 
+  // Dedicated class for mobile links so they look good in a vertical list
+  const mobileNavLink = ({ isActive }: { isActive: boolean }) =>
+    `block px-4 py-3 text-lg font-medium tracking-widest uppercase border-b border-white/5 transition-colors ${
+      isActive ? "text-amber-400 bg-amber-400/5" : "text-white hover:text-amber-400 hover:bg-white/5"
+    }`;
+
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-neutral-950 text-white overflow-x-hidden">
       <Toaster position="top-right" theme="dark" />
       <div className="bg-amber-400 text-black text-center text-xs py-2 tracking-widest uppercase">
         Free Shipping on Orders Over LKR 15,000 · New Summer Collection
@@ -31,9 +49,21 @@ export function Layout() {
 
       <header className="border-b border-white/10 sticky top-0 bg-neutral-950/95 backdrop-blur z-40">
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-6">
-          <Link to="/" className="font-display text-3xl tracking-tight">
-            <span className="italic text-amber-400">SJ</span> Fashion
-          </Link>
+          
+          <div className="flex items-center gap-4">
+            {/* NEW: Hamburger Button (Visible only on mobile/tablet) */}
+            <button 
+              className="md:hidden text-white hover:text-amber-400 transition"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open Menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+
+            <Link to="/" className="font-display text-3xl tracking-tight">
+              <span className="italic text-amber-400">SJ</span> Fashion
+            </Link>
+          </div>
 
           <nav className="hidden md:flex items-center gap-1">
             <MegaMenu />
@@ -81,6 +111,54 @@ export function Layout() {
           </div>
         </div>
       </header>
+
+      {/* NEW: MOBILE SLIDE-OUT MENU */}
+      {/* Background Dark Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 md:hidden" 
+          onClick={() => setIsMobileMenuOpen(false)} 
+        />
+      )}
+
+      {/* The Drawer Panel */}
+      <div 
+        className={`fixed inset-y-0 left-0 w-72 bg-neutral-950 border-r border-white/10 z-50 transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="p-6 flex items-center justify-between border-b border-white/10">
+          <Link to="/" className="font-display text-2xl tracking-tight" onClick={() => setIsMobileMenuOpen(false)}>
+            <span className="italic text-amber-400">SJ</span> Fashion
+          </Link>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="text-neutral-400 hover:text-white transition">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="flex flex-col overflow-y-auto">
+          {/* Mobile Search Bar */}
+          <div className="p-6 pb-2">
+            <form onSubmit={submitSearch} className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search products..."
+                className="pl-9 w-full bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-amber-400"
+              />
+            </form>
+          </div>
+
+          <div className="flex flex-col mt-4">
+            <NavLink to="/category/men" className={mobileNavLink}>Men</NavLink>
+            <NavLink to="/category/women" className={mobileNavLink}>Women</NavLink>
+            <NavLink to="/category/kids" className={mobileNavLink}>Kids</NavLink>
+            <NavLink to="/explore" className={mobileNavLink}>Explore All</NavLink>
+          </div>
+        </div>
+      </div>
+      {/* END MOBILE MENU */}
 
       <main>
         <Outlet />
