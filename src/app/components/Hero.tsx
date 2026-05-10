@@ -15,7 +15,7 @@ const slides = [
     content: (
       <div className="text-left max-w-2xl">
         <p className="text-amber-400 tracking-[0.4em] text-sm uppercase mb-6">
-          Est. 2026 · Premium Fashion
+          Est. 2019 · Premium Fashion
         </p>
         <h1 className="font-display text-7xl md:text-8xl text-white mb-6 leading-none">
           <span className="italic text-amber-400">SJ</span> Fashion

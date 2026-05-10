@@ -44,7 +44,7 @@ export function Layout() {
     <div className="min-h-screen bg-neutral-950 text-white overflow-x-hidden">
       <Toaster position="top-right" theme="dark" />
       <div className="bg-amber-400 text-black text-center text-xs py-2 tracking-widest uppercase">
-        Free Shipping on Orders Over LKR 15,000 · New Summer Collection
+        Enjoy Free Shipping on Qualifying Orders · New Summer Collection
       </div>
 
       <header className="border-b border-white/10 sticky top-0 bg-neutral-950/95 backdrop-blur z-40">

@@ -3,20 +3,20 @@ import { Link } from "react-router";
 
 export function BrandCarousel() {
   const logos = [
-    { name: "Nike", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/nike-4-2.svg" },
+    { name: "Nike", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/nike-8.svg" },
     { name: "Adidas", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/adidas-18.svg" },
     { name: "Puma", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/puma-logo.svg" },
     { name: "Gucci", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/gucci-logo-1.svg" },
     { name: "Levi's", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/levis-1.svg" },
     { name: "Zara", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/zara.svg" },
-    { name: "H&M", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/h-m.svg" },
-    { name: "Calvin Klein", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/calvin-klein-1.svg" },
-    { name: "Tommy Hilfiger", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/tommy-hilfiger-3.svg" },
+    { name: "H&M", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/h-m-1.svg" },
+    { name: "Calvin Klein", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/calvin-klein-logo.svg" },
+    { name: "Tommy Hilfiger", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/tommy%20hilfiger.png" },
     { name: "Versace", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/versace-3.svg" },
-    { name: "Prada", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/prada.svg" },
-    { name: "Louis Vuitton", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/louis-vuitton-1.svg" },
+    { name: "Prada", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/prada-logo-1.svg" },
+    { name: "Louis Vuitton", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/louis-vuitton-4%20(1).svg" },
     { name: "Under Armour", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/under-armour-logo.svg" },
-    { name: "Reebok", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/reebok-2.svg" },
+    { name: "Reebok", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/reebok-2019-logo.svg" },
     { name: "New Balance", logo: "https://hixxecrodoqpnxarfzdd.supabase.co/storage/v1/object/public/brand%20images/new-balance-3.svg" },
   ];
 
