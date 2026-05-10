@@ -27,21 +27,42 @@ export default function Category() {
   }, [refresh, category]);
 
   const cat = category as CategoryKey;
-  const subs = CATEGORIES[cat] || [];
 
-  // NEW: Dynamically grab all unique brands from the database
+  // NEW: Automatically merge Unisex subcategories into the Men/Women sidebar filters!
+  const subs = useMemo(() => {
+    if (!CATEGORIES[cat]) return [];
+    let combined = [...CATEGORIES[cat]];
+    
+    if (cat === "men" || cat === "women") {
+      const unisexSubs = CATEGORIES["unisex"] || [];
+      unisexSubs.forEach((us) => {
+        if (!combined.includes(us)) combined.push(us);
+      });
+    }
+    return combined;
+  }, [cat]);
+
   const uniqueBrands = useMemo(() => {
     const allBrands = new Set(products.map(p => p.brand).filter(Boolean));
     return Array.from(allBrands).sort();
   }, [products]);
 
   const filtered = useMemo(() => {
-    let list = products.filter((p) => p.category === cat);
+    // NEW: The magic filter! If they are on Men/Women, include Unisex items too.
+    let list = products.filter((p) => {
+      if (cat === "men" || cat === "women") {
+        return p.category === cat || p.category === "unisex";
+      }
+      return p.category === cat;
+    });
+
     if (sub) list = list.filter((p) => p.subcategory === sub);
     if (brand && brand !== "all") list = list.filter((p) => p.brand === brand);
     if (size) list = list.filter((p) => p.variants?.some((v) => v.size === size));
-    if (color) list = list.filter((p) => p.variants?.some((v) => v.color === color));
+    if (color) list = list.filter((p) => p.variants?.some((v) => v.color.toLowerCase() === color.toLowerCase()));
+    
     list = list.filter((p) => p.price >= price[0] && p.price <= price[1]);
+    
     if (sort === "low") list = [...list].sort((a, b) => a.price - b.price);
     else if (sort === "high") list = [...list].sort((a, b) => b.price - a.price);
     else if (sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
@@ -90,7 +111,6 @@ export default function Category() {
               <SelectTrigger className="bg-white/5 border-white/10"><SelectValue placeholder="All brands" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All brands</SelectItem>
-                {/* NEW: Maps over the dynamic brands we found in the database */}
                 {uniqueBrands.map((bName) => (
                   <SelectItem key={bName} value={bName}>{bName}</SelectItem>
                 ))}
