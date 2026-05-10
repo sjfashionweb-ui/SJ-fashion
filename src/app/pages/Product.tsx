@@ -16,11 +16,11 @@ export default function Product() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { products, loading, refresh } = useProducts();
-  const { addToCart, wishlist, toggleWishlist } = useCart();
+  
+  // FIXED: We now import 'add' to perfectly match your cart.tsx file
+  const { add, wishlist, toggleWishlist } = useCart();
   
   const [activeImg, setActiveImg] = useState(0); 
-  
-  // NEW: Store quantities for each variant separately in a dictionary
   const [variantQtys, setVariantQtys] = useState<Record<number, number>>({});
 
   useEffect(() => {
@@ -35,10 +35,8 @@ export default function Product() {
 
   const images = product.images && product.images.length > 0 ? product.images : [product.imageUrl];
 
-  // NEW: Sum all quantities selected across all sizes/colors
   const totalQty = Object.values(variantQtys).reduce((sum, q) => sum + q, 0);
 
-  // NEW: Dynamic Bulk Price Calculation based on TOTAL quantity
   const currentPrice = (() => {
     if (!product.bulkPricing || product.bulkPricing.length === 0) return product.price;
     const applicableTier = [...product.bulkPricing].sort((a, b) => b.minQty - a.minQty).find(tier => totalQty >= tier.minQty);
@@ -55,11 +53,11 @@ export default function Product() {
   function handleAddToCart() {
     if (totalQty === 0) return toast.error("Please select at least one item quantity.");
     
-    // Add each variant to the cart at the discounted wholesale price
+    // FIXED: Using the correct 'add' function
     Object.entries(variantQtys).forEach(([idxStr, qty]) => {
       if (qty > 0) {
         const v = product!.variants[parseInt(idxStr)];
-        addToCart(
+        add(
           { ...product!, price: currentPrice }, // Apply the discounted price
           v.size, 
           v.color, 
@@ -125,7 +123,6 @@ export default function Product() {
             <p className="text-neutral-400 leading-relaxed text-sm">{product.description}</p>
           </div>
 
-          {/* NEW WHOLESALE VARIANT MATRIX */}
           <div className="space-y-4 mb-8 border-t border-white/10 pt-8">
             <h4 className="text-xs uppercase tracking-widest text-neutral-400">Select Quantities</h4>
             <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
