@@ -61,7 +61,7 @@ export function Layout() {
             </button>
 
             <Link to="/" className="font-display text-3xl tracking-tight">
-              <span className="italic text-amber-400">SJ</span> Fashion
+              <span className="italic text-amber-400">SJ Lanka</span> Fashion
             </Link>
           </div>
 
@@ -69,6 +69,7 @@ export function Layout() {
             <MegaMenu />
             <NavLink to="/category/men" className={navLink}>Men</NavLink>
             <NavLink to="/category/women" className={navLink}>Women</NavLink>
+            <NavLink to="/category/unisex" className={navLink}>Unisex</NavLink>
             <NavLink to="/category/kids" className={navLink}>Kids</NavLink>
             <NavLink to="/explore" className={navLink}>Explore</NavLink>
           </nav>
@@ -175,7 +176,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-10">
         <div>
           <h3 className="font-display text-2xl mb-3">
-            <span className="italic text-amber-400">SJ</span> Fashion
+            <span className="italic text-amber-400">SJ Lanka</span> Fashion
           </h3>
           <p className="text-sm text-neutral-400">
             Your destination for trending fashion. Curated styles for men, women, and kids.
@@ -186,6 +187,7 @@ function Footer() {
           <ul className="space-y-2 text-sm text-neutral-400">
             <li><Link to="/category/men" className="hover:text-white">Men</Link></li>
             <li><Link to="/category/women" className="hover:text-white">Women</Link></li>
+            <li><Link to="/category/unisex" className="hover:text-white">Unisex</Link></li>
             <li><Link to="/category/kids" className="hover:text-white">Kids</Link></li>
             <li><Link to="/explore" className="hover:text-white">New Arrivals</Link></li>
           </ul>
