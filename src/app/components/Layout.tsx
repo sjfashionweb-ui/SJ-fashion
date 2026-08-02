@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
 import { useCart } from "../lib/cart";
+import { WhatsAppButton } from "./WhatsAppButton";
 
 export function Layout() {
   const { count, wishlist } = useCart();
@@ -166,6 +167,8 @@ export function Layout() {
       </main>
 
       <Footer />
+      {/* NEW: The Floating Action Menu is now safely rendered inside the Router context! */}
+      <WhatsAppButton />
     </div>
   );
 }
