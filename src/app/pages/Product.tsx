@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router";
-import { ArrowLeft, Heart, Minus, Plus, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Heart, Minus, Plus, MessageCircle } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { useProducts } from "../lib/products";
@@ -17,8 +18,7 @@ export default function Product() {
   const navigate = useNavigate();
   const { products, loading, refresh } = useProducts();
   
-  // FIXED: We now import 'add' to perfectly match your cart.tsx file
-  const { add, wishlist, toggleWishlist } = useCart();
+  const { wishlist, toggleWishlist } = useCart();
   
   const [activeImg, setActiveImg] = useState(0); 
   const [variantQtys, setVariantQtys] = useState<Record<number, number>>({});
@@ -50,27 +50,39 @@ export default function Product() {
     });
   };
 
-  function handleAddToCart() {
-    if (totalQty === 0) return toast.error("Please select at least one item quantity.");
+  function handleWhatsAppCheckout() {
+    if (totalQty === 0) return toast.error("Please select at least one item quantity to order.");
     
-    // FIXED: Using the correct 'add' function
+    const WHATSAPP_NUMBER = "94763923201"; 
+    let orderMsg = `*New Order Request*\n\n*Product:* ${product!.name}\n\n*Variants Selected:*\n`;
+    
     Object.entries(variantQtys).forEach(([idxStr, qty]) => {
       if (qty > 0) {
         const v = product!.variants[parseInt(idxStr)];
-        add(
-          { ...product!, price: currentPrice }, // Apply the discounted price
-          v.size, 
-          v.color, 
-          qty
-        );
+        orderMsg += `- Size: ${v.size} | Color: ${v.color} | Qty: ${qty}\n`;
       }
     });
-    toast.success(`${totalQty} items added to cart at LKR ${formatLKR(currentPrice)} ea.`);
-    setVariantQtys({}); // Reset selection
+
+    const totalEstimated = currentPrice * totalQty;
+    orderMsg += `\n*Total Estimated:* LKR ${formatLKR(totalEstimated)}\n\nHow can I proceed with the payment?`;
+    
+    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderMsg)}`;
+    window.open(waUrl, "_blank");
+    
+    setVariantQtys({}); 
   }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
+      {/* DYNAMIC SEO INJECTION */}
+      <Helmet>
+        <title>Buy {product.name} in Sri Lanka | SJ Lanka Fashion</title>
+        <meta name="description" content={`Get the authentic ${product.name} by ${product.brand} today. Available for bulk and retail at SJ Lanka Fashion.`} />
+        <meta property="og:title" content={`${product.name} | SJ Lanka Fashion`} />
+        <meta property="og:description" content={`Buy ${product.brand} ${product.name} online.`} />
+        <meta property="og:image" content={images[0]} />
+      </Helmet>
+
       <button onClick={() => navigate(-1)} className="flex items-center text-xs text-neutral-400 hover:text-amber-400 mb-8 uppercase tracking-widest transition">
         <ArrowLeft className="w-4 h-4 mr-2" /> Back
       </button>
@@ -78,14 +90,14 @@ export default function Product() {
       <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
         <div className="space-y-4">
           <div className="relative aspect-[4/5] bg-neutral-900 rounded-xl overflow-hidden border border-white/5">
-            <ImageWithFallback src={images[activeImg]} alt={product.name} className="w-full h-full object-cover" />
+            <ImageWithFallback src={images[activeImg]} alt={`${product.name} - ${product.brand} Sri Lanka`} className="w-full h-full object-cover" />
             {product.bulkPricing && product.bulkPricing.length > 0 && <Badge className="absolute top-4 left-4 bg-amber-400 text-black text-xs px-3 py-1 font-bold tracking-widest shadow-lg">WHOLESALE</Badge>}
           </div>
           {images.length > 1 && (
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {images.map((img, idx) => (
                 <button key={idx} onClick={() => setActiveImg(idx)} className={`relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-colors duration-300 ${activeImg === idx ? 'border-amber-400' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                  <img src={img} className="w-full h-full object-cover" />
+                  <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -144,9 +156,10 @@ export default function Product() {
           </div>
 
           <div className="flex gap-4">
-            <Button onClick={handleAddToCart} className="flex-1 h-14 bg-amber-400 text-black hover:bg-amber-500 text-sm font-bold tracking-widest uppercase">
-              <ShoppingBag className="w-5 h-5 mr-3" /> Add to Cart
+            <Button onClick={handleWhatsAppCheckout} className="flex-1 h-14 bg-[#25D366] text-white hover:bg-[#20bd5a] text-sm font-bold tracking-widest uppercase shadow-[0_4px_14px_0_rgba(37,211,102,0.39)]">
+              <MessageCircle className="w-5 h-5 mr-3" /> Order via WhatsApp
             </Button>
+            
             <Button onClick={() => toggleWishlist(product.id)} variant="outline" className={`w-14 h-14 border-white/20 ${liked ? "bg-amber-400/10 border-amber-400" : "hover:border-amber-400"}`}>
               <Heart className={`w-5 h-5 ${liked ? "fill-amber-400 text-amber-400" : "text-neutral-400"}`} />
             </Button>

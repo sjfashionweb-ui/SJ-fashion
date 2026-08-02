@@ -11,7 +11,7 @@ const formatCurrency = (amount: number) => {
 };
 
 // IMPORTANT: Put your WhatsApp number here (Include country code, no '+')
-const WHATSAPP_NUMBER = "94770000000"; 
+const WHATSAPP_NUMBER = "94763923201"; 
 
 export default function Cart() {
   const { items, total, setQty, remove, clear } = useCart();

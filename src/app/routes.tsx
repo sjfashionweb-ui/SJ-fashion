@@ -1,4 +1,4 @@
-import { createHashRouter, Navigate, Outlet } from "react-router";
+import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "./components/Layout";
 import Home from "./pages/Home";
@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import { AdminPage } from "./components/admin/AdminPage";
 import { AdminLogin } from "./components/admin/AdminLogin";
 import { supabase } from "./lib/api";
+
 // 1. Create a wrapper to protect the admin route
 function ProtectedAdminRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -44,8 +45,8 @@ function ProtectedAdminRoute() {
   return <Outlet />;
 }
 
-// 2. Set up the router
-export const router = createHashRouter([
+// 2. Set up the router using createBrowserRouter for clean URLs
+export const router = createBrowserRouter([
   {
     path: "/",
     Component: Layout,

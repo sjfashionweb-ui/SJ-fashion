@@ -28,7 +28,6 @@ export default function Category() {
 
   const cat = category as CategoryKey;
 
-  // NEW: Automatically merge Unisex subcategories into the Men/Women sidebar filters!
   const subs = useMemo(() => {
     if (!CATEGORIES[cat]) return [];
     let combined = [...CATEGORIES[cat]];
@@ -48,7 +47,6 @@ export default function Category() {
   }, [products]);
 
   const filtered = useMemo(() => {
-    // NEW: The magic filter! If they are on Men/Women, include Unisex items too.
     let list = products.filter((p) => {
       if (cat === "men" || cat === "women") {
         return p.category === cat || p.category === "unisex";
@@ -94,7 +92,9 @@ export default function Category() {
       <p className="text-neutral-400 mb-8">{filtered.length} products</p>
 
       <div className="grid lg:grid-cols-[260px_1fr] gap-10">
-        <aside className="space-y-8">
+        
+        {/* NEW: Added lg:sticky lg:top-24 and h-fit so the sidebar stays on screen */}
+        <aside className="space-y-8 lg:sticky lg:top-24 h-fit">
           <div>
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">Subcategory</h3>
             <div className="flex flex-wrap gap-2">
@@ -130,8 +130,19 @@ export default function Category() {
           <div>
             <h3 className="text-amber-400 text-xs tracking-[0.3em] uppercase mb-3">Color</h3>
             <div className="flex flex-wrap gap-2">
+              {/* NEW: Replaced text pills with visual color swatches */}
               {COLORS.map((c) => (
-                <button key={c} onClick={() => setColor(color === c ? "" : c)} className={`text-xs px-3 py-1.5 rounded-full border ${color === c ? "bg-amber-400 text-black border-amber-400" : "border-white/20 text-neutral-300 hover:border-amber-400"}`}>{c}</button>
+                <button 
+                  key={c} 
+                  onClick={() => setColor(color === c ? "" : c)} 
+                  title={c}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    color === c ? "border-amber-400 scale-110 shadow-[0_0_10px_rgba(251,191,36,0.5)]" : "border-white/20 hover:border-white/60"
+                  }`}
+                  style={{ backgroundColor: c.toLowerCase().replace(/\s/g, '') }}
+                >
+                  <span className="sr-only">{c}</span>
+                </button>
               ))}
             </div>
           </div>
