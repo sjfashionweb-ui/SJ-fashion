@@ -9,10 +9,7 @@ export default function App() {
     <HelmetProvider>
       <ProductsProvider>
         <CartProvider>
-          <>
-            <RouterProvider router={router} />
-            <WhatsAppButton />
-          </>
+          <RouterProvider router={router} />
         </CartProvider>
       </ProductsProvider>
     </HelmetProvider>
