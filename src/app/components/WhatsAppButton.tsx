@@ -24,16 +24,15 @@ export function WhatsAppButton() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3" ref={menuRef}>
       
-      {/* TikTok Button */}
+      {/* TikTok Button - INCREASED SIZE TO w-14 h-14 */}
       <a
         href="https://tiktok.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-12 h-12 bg-black hover:bg-neutral-800 text-white rounded-full shadow-lg hover:-translate-y-1 transition-all duration-300 border border-white/10 group"
+        className="flex items-center justify-center w-14 h-14 bg-black hover:bg-neutral-800 text-white rounded-full shadow-lg hover:-translate-y-1 transition-all duration-300 border border-white/10 group"
         aria-label="Follow us on TikTok"
       >
-        {/* Custom TikTok SVG */}
-        <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+        <svg fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6">
           <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
         </svg>
         <span className="absolute right-full mr-4 bg-neutral-900 text-white text-xs font-bold px-3 py-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-white/10">
@@ -64,14 +63,21 @@ export function WhatsAppButton() {
         </a>
       </div>
 
-      {/* Main WhatsApp Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-14 h-14 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)] hover:-translate-y-1 transition-all duration-300"
-        aria-label="Open support menu"
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-7 h-7" />}
-      </button>
+      {/* Main WhatsApp Toggle Button with Subtle Ping */}
+      <div className="relative flex items-center justify-center">
+        {/* NEW: Subtle animated ping layer */}
+        {!isOpen && (
+          <span className="absolute inset-0 rounded-full bg-[#25D366] opacity-30 animate-ping duration-1000"></span>
+        )}
+        
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative flex items-center justify-center w-14 h-14 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)] hover:-translate-y-1 transition-all duration-300"
+          aria-label="Open support menu"
+        >
+          {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-7 h-7" />}
+        </button>
+      </div>
 
     </div>
   );
