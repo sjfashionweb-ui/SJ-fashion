@@ -2,7 +2,7 @@ import { MessageCircle } from "lucide-react";
 
 export function WhatsAppButton() {
   // IMPORTANT: Match this to your actual WhatsApp number
-  const WHATSAPP_NUMBER = "94710773717"; 
+  const WHATSAPP_NUMBER = "94763923201"; 
   const defaultMessage = "Hi SJ-Fashion! I have a question about your products.";
 
   return (
