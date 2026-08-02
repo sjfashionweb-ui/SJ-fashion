@@ -24,12 +24,12 @@ export function WhatsAppButton() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3" ref={menuRef}>
       
-      {/* TikTok Button - INCREASED SIZE TO w-14 h-14 */}
+      {/* TikTok Button - UPDATED: Added border-2 border-white to create the distinct ring */}
       <a
         href="https://tiktok.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-14 h-14 bg-black hover:bg-neutral-800 text-white rounded-full shadow-lg hover:-translate-y-1 transition-all duration-300 border border-white/10 group"
+        className="flex items-center justify-center w-14 h-14 bg-black hover:bg-neutral-800 text-white rounded-full shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-white group"
         aria-label="Follow us on TikTok"
       >
         <svg fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6">
@@ -63,9 +63,8 @@ export function WhatsAppButton() {
         </a>
       </div>
 
-      {/* Main WhatsApp Toggle Button with Subtle Ping */}
+      {/* Main WhatsApp Toggle Button */}
       <div className="relative flex items-center justify-center">
-        {/* NEW: Subtle animated ping layer */}
         {!isOpen && (
           <span className="absolute inset-0 rounded-full bg-[#25D366] opacity-30 animate-ping duration-1000"></span>
         )}
