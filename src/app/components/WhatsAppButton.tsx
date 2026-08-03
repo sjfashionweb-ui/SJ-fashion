@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, HelpCircle, Package, X } from "lucide-react";
-import { Link } from "react-router";
 
 export function WhatsAppButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +8,7 @@ export function WhatsAppButton() {
   // IMPORTANT: Match this to your actual WhatsApp number
   const WHATSAPP_NUMBER = "94763923201"; 
   const helpMessage = "Hi SJ-Fashion! I need some help with your products.";
+  const trackMessage = "Hi SJ-Fashion! I would like to track the status of my recent order.";
   
   // Close menu when clicking outside
   useEffect(() => {
@@ -24,9 +24,9 @@ export function WhatsAppButton() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3" ref={menuRef}>
       
-      {/* TikTok Button - UPDATED: Added border-2 border-white to create the distinct ring */}
+      {/* TikTok Button - UPDATED LINK */}
       <a
-        href="https://tiktok.com"
+        href="https://www.tiktok.com/@sj.lankafashionofficial?_r=1&_t=ZS-98ZDn1YQfZ7"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center w-14 h-14 bg-black hover:bg-neutral-800 text-white rounded-full shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-white group"
@@ -42,14 +42,18 @@ export function WhatsAppButton() {
 
       {/* WhatsApp Expandable Menu */}
       <div className={`flex flex-col gap-2 transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100 mb-2' : 'scale-0 opacity-0 h-0 overflow-hidden'}`}>
-        <Link 
-          to="/account/orders"
+        
+        {/* Track Order - NOW ROUTES TO WHATSAPP */}
+        <a 
+          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(trackMessage)}`}
+          target="_blank"
+          rel="noopener noreferrer"
           onClick={() => setIsOpen(false)}
           className="flex items-center gap-3 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg border border-white/10 transition-colors w-40"
         >
           <Package className="w-4 h-4 text-amber-400" />
           Track Order
-        </Link>
+        </a>
         
         <a 
           href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(helpMessage)}`}

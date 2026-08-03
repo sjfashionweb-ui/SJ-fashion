@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import {
   Package,
   ShoppingCart,
@@ -67,6 +68,9 @@ export function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  
+  // NEW: Setup the navigation hook
+  const navigate = useNavigate();
 
   async function refresh() {
     try {
@@ -184,7 +188,8 @@ export function AdminPage() {
             <Button className="bg-amber-400 text-black hover:bg-amber-500" onClick={seedDemoOrder}>
               + Demo Order
             </Button>
-            <Button variant="ghost" className="text-white hover:text-amber-400" onClick={() => (window.location.hash = "/")}>
+            {/* NEW: Replaced window.location.hash with clean router navigation */}
+            <Button variant="ghost" className="text-white hover:text-amber-400" onClick={() => navigate("/")}>
               View Storefront
             </Button>
           </div>
